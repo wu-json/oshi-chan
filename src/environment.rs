@@ -19,7 +19,7 @@ pub fn get_oshi_env() -> String {
     env::var("OSHI_ENV").expect("OSHI_ENV is missing")
 }
 
-pub fn get_oshi_testing_channel_id() -> ChannelId {
-    let env_str: String = env::var("OSHI_TESTING_CHANNEL_ID").expect("OSHI_TESTING_CHANNEL_ID");
+pub fn get_oshi_dev_channel_id() -> ChannelId {
+    let env_str: String = env::var("OSHI_DEVELOPMENT_CHANNEL_ID").expect("OSHI_DEVELOPMENT_CHANNEL_ID");
     ChannelId(env_str.parse::<u64>().unwrap())
 }
