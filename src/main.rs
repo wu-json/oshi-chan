@@ -1,8 +1,8 @@
 mod environment;
 use serenity::{
     async_trait,
-    model::{channel::Message, gateway::Ready},
     framework::standard::StandardFramework,
+    model::{channel::Message, gateway::Ready},
     prelude::*,
 };
 
@@ -11,6 +11,13 @@ struct Handler;
 #[async_trait]
 impl EventHandler for Handler {
     async fn message(&self, ctx: Context, msg: Message) {
+        if environment::get_oshi_env() == "production"
+            && environment::get_oshi_testing_channel_id() == msg.channel_id
+        {
+            println!("Ignoring message in Oshi Testing channel in production environment");
+            return;
+        }
+
         if msg.content == "hello oshi" {
             if let Err(why) = msg.channel_id.say(&ctx.http, "hello").await {
                 println!("Error sending message: {:?}", why);
