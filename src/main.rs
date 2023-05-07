@@ -25,7 +25,8 @@ impl EventHandler for Handler {
 
 #[tokio::main]
 async fn main() {
-    environment::init();
+    let oshi_env = environment::init();
+    println!("Starting oshi-chan in {oshi_env} environment");
 
     let framework: StandardFramework = StandardFramework::new();
     let token: String = environment::get_discord_token();
