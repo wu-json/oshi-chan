@@ -1,0 +1,19 @@
+# fly.toml app configuration file generated for oshi-chan on 2023-05-07T18:58:47-04:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "oshi-chan"
+kill_signal = "SIGINT"
+kill_timeout = 5
+primary_region = "bos"
+processes = []
+
+[build]
+
+[env]
+
+[experimental]
+  auto_rollback = true
+
+[[services]]
