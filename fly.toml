@@ -1,19 +1,25 @@
-# fly.toml app configuration file generated for oshi-chan on 2023-05-07T18:58:47-04:00
+# fly.toml app configuration file generated for oshi-chan on 2023-05-07T19:11:05-04:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
 app = "oshi-chan"
-kill_signal = "SIGINT"
-kill_timeout = 5
 primary_region = "bos"
-processes = []
-
-[build]
-
-[env]
+kill_signal = "SIGINT"
+kill_timeout = "5s"
 
 [experimental]
   auto_rollback = true
 
+[env]
+  PRIMARY_REGION = "bos"
+
 [[services]]
+  protocol = "tcp"
+  internal_port = 8080
+  ports = []
+  processes = ["app"]
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 25
+    soft_limit = 20
