@@ -1,2 +1,2 @@
 [workspace]
-members = ["oshi-chan", "oshi-hourly-cron"]
+members = ["oshi-chan"]
