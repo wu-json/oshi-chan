@@ -9,6 +9,7 @@ pub struct Handler;
 #[async_trait]
 impl EventHandler for Handler {
     async fn message(&self, ctx: Context, msg: Message) {
+        // Ignore #oshi-development channel in production since it's for local testing
         if super::environment::get_oshi_env() == "production"
             && super::environment::get_oshi_dev_channel_id() == msg.channel_id
         {
