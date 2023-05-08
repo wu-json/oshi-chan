@@ -24,6 +24,6 @@ impl EventHandler for Handler {
     }
 
     async fn ready(&self, _: Context, ready: Ready) {
-        println!("{} is connected!", ready.user.name);
+        println!("Handler for {} is connected", ready.user.name);
     }
 }
