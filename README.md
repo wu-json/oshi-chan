@@ -13,7 +13,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 ### Build and Start the Program
 ```bash
-ENV_FILE=.env.development cargo run
+ENV_FILE=.env.development cargo run -p oshi-chan
 ```
 
 ## Usage

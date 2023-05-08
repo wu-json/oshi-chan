@@ -4,12 +4,12 @@ on:
     branches:
       - main
 jobs:
-  deploy-server:
+  deploy-oshi-chan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - run: echo ${{ github.actor }}
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only
+      - run: flyctl deploy --remote-only --dockerfile ./oshi-chan/Dockerfile
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
