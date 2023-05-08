@@ -25,7 +25,7 @@ impl EventHandler for Handler {
         let command_parts = parts.collect::<Vec<&str>>();
 
         if command_parts.len() < 2 {
-            // TODO: put help script here
+            commands::introduce::exec(&ctx, &msg).await;
             return;
         }
 
