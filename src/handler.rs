@@ -13,7 +13,6 @@ impl EventHandler for Handler {
         if super::environment::get_oshi_env() == "production"
             && super::environment::get_oshi_dev_channel_id() == msg.channel_id
         {
-            println!("Ignoring message in Oshi dev channel in production environment");
             return;
         }
 
