@@ -1,5 +1,6 @@
 mod environment;
 mod handler;
+mod commands;
 
 use serenity::{
     framework::standard::StandardFramework,

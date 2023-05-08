@@ -1,3 +1,4 @@
+use crate::commands;
 use serenity::{
     async_trait,
     model::{channel::Message, gateway::Ready},
@@ -17,6 +18,22 @@ impl EventHandler for Handler {
         // Ignore any messages not meant for oshi-chan
         } else if !msg.content.starts_with("!oshi") {
             return;
+        }
+
+        let content_copy = msg.content.clone();
+        let parts = content_copy.split(" ");
+        let command_parts = parts.collect::<Vec<&str>>();
+
+        if command_parts.len() < 2 {
+            // TODO: put help script here
+            return;
+        }
+
+        match command_parts[1] {
+            "version" => {
+                commands::version::exec(&ctx, &msg).await;
+            }
+            _ => (),
         }
 
         if msg.content == "hello oshi" {
