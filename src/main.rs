@@ -21,9 +21,9 @@ async fn main() {
         .event_handler(handlers::Handler)
         .framework(framework)
         .await
-        .expect("Err creating client");
+        .expect("Error creating serenity client");
 
     if let Err(why) = client.start().await {
-        println!("Client error: {:?}", why);
+        println!("Serenity client error: {:?}", why);
     }
 }
