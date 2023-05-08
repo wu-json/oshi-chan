@@ -1,5 +1,5 @@
 mod environment;
-mod handlers;
+mod handler;
 
 use serenity::{
     framework::standard::StandardFramework,
@@ -18,7 +18,7 @@ async fn main() {
         GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
 
     let mut client: Client = Client::builder(&token, intents)
-        .event_handler(handlers::Handler)
+        .event_handler(handler::Handler)
         .framework(framework)
         .await
         .expect("Error creating serenity client");
