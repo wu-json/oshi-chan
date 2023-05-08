@@ -14,6 +14,9 @@ impl EventHandler for Handler {
             && super::environment::get_oshi_dev_channel_id() == msg.channel_id
         {
             return;
+        // Ignore any messages not meant for oshi-chan
+        } else if !msg.content.starts_with("!oshi") {
+            return;
         }
 
         if msg.content == "hello oshi" {
