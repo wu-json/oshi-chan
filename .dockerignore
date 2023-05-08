@@ -17,6 +17,8 @@
 
 # Added by cargo
 
+.github
 target
+.env.*
 **/*.env
-fly.toml
+**/fly.toml
