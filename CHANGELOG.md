@@ -1,3 +1,7 @@
+### 0.1.2
+
+- Add version and introduction commands.
+
 ### 0.1.1
 
 - Ignore oshi-development events.
