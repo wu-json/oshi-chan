@@ -6,7 +6,7 @@ const COMMAND_LIST: &str = "
 ";
 
 pub async fn exec(ctx: &Context, msg: &Message) {
-    let content = MessageBuilder::new()
+    let content: String = MessageBuilder::new()
         .push_line("Hello there, Human! My name is Oshi-Chan though you will address me as Oshi-Sama or face deez nuts. Here are a list of commands you can use to summon me.")
         .push_codeblock(COMMAND_LIST, Some("bash"))
         .build();
