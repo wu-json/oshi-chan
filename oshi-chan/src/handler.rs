@@ -20,9 +20,9 @@ impl EventHandler for Handler {
             return;
         }
 
-        let content_copy = msg.content.clone();
-        let parts = content_copy.split(" ");
-        let command_parts = parts.collect::<Vec<&str>>();
+        let content_copy: String = msg.content.clone();
+        let parts: std::str::Split<&str> = content_copy.split(" ");
+        let command_parts: Vec<&str> = parts.collect::<Vec<&str>>();
 
         if command_parts.len() < 2 {
             commands::introduce::exec(&ctx, &msg).await;

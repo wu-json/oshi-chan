@@ -9,7 +9,7 @@ use serenity::{
 
 #[tokio::main]
 async fn main() {
-    let oshi_env = environment::init();
+    let oshi_env: String = environment::init();
     println!("Starting oshi-chan in {oshi_env} environment");
 
     let framework: StandardFramework = StandardFramework::new();
