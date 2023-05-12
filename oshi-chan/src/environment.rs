@@ -23,3 +23,7 @@ pub fn get_oshi_dev_channel_id() -> ChannelId {
     let env_str: String = env::var("OSHI_DEVELOPMENT_CHANNEL_ID").expect("OSHI_DEVELOPMENT_CHANNEL_ID");
     ChannelId(env_str.parse::<u64>().unwrap())
 }
+
+pub fn get_oshi_version() -> &'static str {
+    env!("CARGO_PKG_VERSION")
+}
