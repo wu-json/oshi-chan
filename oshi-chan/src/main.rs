@@ -1,19 +1,17 @@
+mod commands;
 mod environment;
 mod handler;
-mod commands;
 
-use serenity::{
-    framework::standard::StandardFramework,
-    prelude::*,
-};
+use environment::{Environment, EnvironmentTrait};
+use serenity::{framework::standard::StandardFramework, prelude::*};
 
 #[tokio::main]
 async fn main() {
-    let oshi_env: String = environment::init();
+    let oshi_env: String = Environment::init();
     println!("Starting oshi-chan in {oshi_env} environment");
 
     let framework: StandardFramework = StandardFramework::new();
-    let token: String = environment::get_discord_token();
+    let token: String = Environment::get_discord_token();
 
     let intents: GatewayIntents =
         GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
