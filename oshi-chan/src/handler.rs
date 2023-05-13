@@ -1,4 +1,5 @@
 use crate::commands;
+use crate::environment::{Environment, EnvironmentTrait};
 use serenity::{
     async_trait,
     model::{channel::Message, gateway::Ready},
@@ -11,8 +12,8 @@ pub struct Handler;
 impl EventHandler for Handler {
     async fn message(&self, ctx: Context, msg: Message) {
         // Ignore #oshi-development channel in production since it's for local testing
-        if super::environment::get_oshi_env() == "production"
-            && super::environment::get_oshi_dev_channel_id() == msg.channel_id
+        if Environment::get_oshi_env() == "production"
+            && Environment::get_oshi_dev_channel_id() == msg.channel_id
         {
             return;
         // Ignore any messages not meant for oshi-chan
@@ -20,9 +21,9 @@ impl EventHandler for Handler {
             return;
         }
 
-        let content_copy = msg.content.clone();
-        let parts = content_copy.split(" ");
-        let command_parts = parts.collect::<Vec<&str>>();
+        let content_copy: String = msg.content.clone();
+        let parts: std::str::Split<&str> = content_copy.split(" ");
+        let command_parts: Vec<&str> = parts.collect::<Vec<&str>>();
 
         if command_parts.len() < 2 {
             commands::introduce::exec(&ctx, &msg).await;
