@@ -130,8 +130,14 @@ pub async fn scrape_anime(id: &str) -> Result<Anime, ScrapeAnimeError> {
     let name: Vec<&str> = name.text().collect::<Vec<_>>();
     let name: &str = name[0];
 
-    let desc: Selector = Selector::parse("div.info div.shorting div.content").unwrap();
-    let desc: scraper::ElementRef = document.select(&desc).next().unwrap();
+    let desc: Selector = match Selector::parse("div.info div.shorting div.content") {
+        Ok(s) => s,
+        Err(e) => return Err(ScrapeAnimeError::SelectorCreationError(e.to_string()))
+    };
+    let desc: scraper::ElementRef = match document.select(&desc).next() {
+        Some(s) => s,
+        None => return Err(ScrapeAnimeError::SelectorNotFoundError(String::from("Description not found.")))
+    };
     let desc: Vec<&str> = desc.text().collect::<Vec<_>>();
     let desc: &str = desc[0];
 
