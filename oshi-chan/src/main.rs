@@ -3,8 +3,14 @@ mod environment;
 mod handler;
 
 use environment::{Environment, EnvironmentTrait};
-use pg_client;
+use pg_client::{ConnectionManager, PgConnection, Pool};
 use serenity::{framework::standard::StandardFramework, prelude::*};
+
+pub struct PgPool;
+
+impl serenity::prelude::TypeMapKey for PgPool {
+    type Value = Pool<ConnectionManager<PgConnection>>;
+}
 
 #[tokio::main]
 async fn main() {
@@ -17,14 +23,24 @@ async fn main() {
     let intents: GatewayIntents =
         GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
 
-    let mut connection = pg_client::connect(&Environment::get_database_url());
-    pg_client::migrate(&mut connection);
+    let pool: Pool<ConnectionManager<PgConnection>> =
+        pg_client::create_connection_pool(&Environment::get_database_url());
+    {
+        let connection: &mut pg_client::PooledConnection<ConnectionManager<PgConnection>> =
+            &mut pool.get().unwrap();
+        pg_client::migrate(connection);
+    };
 
     let mut client: Client = Client::builder(&token, intents)
         .event_handler(handler::Handler)
         .framework(framework)
         .await
         .expect("Error creating serenity client");
+
+    {
+        let mut data: tokio::sync::RwLockWriteGuard<TypeMap> = client.data.write().await;
+        data.insert::<PgPool>(pool);
+    }
 
     if let Err(why) = client.start().await {
         println!("Serenity client error: {:?}", why);

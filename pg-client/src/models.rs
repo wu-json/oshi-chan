@@ -1,5 +1,6 @@
 use crate::schema::watchlist;
 use diesel::prelude::*;
+use diesel::data_types::PgTimestamp;
 
 #[derive(Queryable)]
 pub struct WatchList {
@@ -10,6 +11,7 @@ pub struct WatchList {
     pub post_img_url: String,
     pub latest_episode: i32,
     pub total_episodes: i32,
+    pub created_on: PgTimestamp,
 }
 
 #[derive(Insertable)]
