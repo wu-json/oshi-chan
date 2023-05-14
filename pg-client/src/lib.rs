@@ -1,14 +1,6 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+use diesel::pg::PgConnection;
+use diesel::prelude::*;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+pub fn connect(database_url: &str) -> PgConnection {
+    PgConnection::establish(database_url).expect(&format!("Error connecting to {}", database_url))
 }
