@@ -8,6 +8,8 @@ use tokio::time::{sleep, Duration};
 pub enum IsEpisodeOutError {
     #[error("Browser error.")]
     BrowserError(String),
+    #[error("Browser tab error.")]
+    BrowserTabError(String),
 }
 
 // This code tries to see whether an episode is out by navigating to the
@@ -18,17 +20,20 @@ pub async fn is_episode_out(id: &str, episode: u32) -> Result<bool, IsEpisodeOut
 
     let browser: Browser = match Browser::default() {
         Ok(b) => b,
-        Err(err) => return Err(IsEpisodeOutError::BrowserError(err.to_string())),
+        Err(e) => return Err(IsEpisodeOutError::BrowserError(e.to_string())),
     };
 
-    let tab: std::sync::Arc<headless_chrome::Tab> = browser.new_tab().unwrap();
+    let tab: std::sync::Arc<headless_chrome::Tab> = match browser.new_tab() {
+        Ok(t) => t,
+        Err(e) => return Err(IsEpisodeOutError::BrowserTabError(e.to_string())),
+    };
 
     tab.enable_stealth_mode().unwrap();
     tab.set_user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36", Some("en-US,en;q=0.9,hi;q=0.8,es;q=0.7,lt;q=0.6"), Some("macOS")).unwrap();
 
     tab.navigate_to(&url).unwrap();
 
-    sleep(Duration::from_millis(3000)).await;
+    sleep(Duration::from_millis(500)).await;
 
     let new_url: String = tab.get_url();
 
