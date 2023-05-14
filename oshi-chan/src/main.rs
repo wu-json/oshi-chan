@@ -38,7 +38,7 @@ async fn main() {
         .expect("Error creating serenity client");
 
     {
-        let mut data = client.data.write().await;
+        let mut data: tokio::sync::RwLockWriteGuard<TypeMap> = client.data.write().await;
         data.insert::<PgPool>(pool);
     }
 
