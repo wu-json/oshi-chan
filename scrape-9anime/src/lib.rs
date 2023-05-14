@@ -10,6 +10,10 @@ pub enum IsEpisodeOutError {
     BrowserError(String),
     #[error("Browser tab error.")]
     BrowserTabError(String),
+    #[error("Stealth mode error.")]
+    StealthModeError(String),
+    #[error("Set user agent error.")]
+    SetUserAgentError(String),
 }
 
 // This code tries to see whether an episode is out by navigating to the
@@ -28,8 +32,15 @@ pub async fn is_episode_out(id: &str, episode: u32) -> Result<bool, IsEpisodeOut
         Err(e) => return Err(IsEpisodeOutError::BrowserTabError(e.to_string())),
     };
 
-    tab.enable_stealth_mode().unwrap();
-    tab.set_user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36", Some("en-US,en;q=0.9,hi;q=0.8,es;q=0.7,lt;q=0.6"), Some("macOS")).unwrap();
+    match tab.enable_stealth_mode() {
+        Ok(_) => {},
+        Err(e) => return Err(IsEpisodeOutError::StealthModeError(e.to_string()))
+    }
+
+    match tab.set_user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36", Some("en-US,en;q=0.9,hi;q=0.8,es;q=0.7,lt;q=0.6"), Some("macOS")) {
+        Ok(_) => {},
+        Err(e) => return Err(IsEpisodeOutError::SetUserAgentError(e.to_string()))
+    }
 
     tab.navigate_to(&url).unwrap();
 
