@@ -22,7 +22,7 @@ pub async fn exec(ctx: &Context, msg: &Message, nine_anime_id: &str, latest_epis
         total_episodes: anime.total_episodes as i32,
     };
 
-    let mut data: tokio::sync::RwLockReadGuard<TypeMap> = ctx.data.read().await;
+    let data: tokio::sync::RwLockReadGuard<TypeMap> = ctx.data.read().await;
     let pool: &Pool<ConnectionManager<PgConnection>> = data.get::<PgPool>().unwrap();
     let connection: &mut PooledConnection<ConnectionManager<PgConnection>> =
         &mut pool.get().unwrap();
