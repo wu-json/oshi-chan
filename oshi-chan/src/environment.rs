@@ -5,6 +5,7 @@ use std::env;
 #[cfg_attr(test, mockall::automock)]
 pub trait EnvironmentTrait {
     fn init() -> String;
+    fn get_database_url() -> String;
     fn get_discord_token() -> String;
     fn get_oshi_env() -> String;
     fn get_oshi_dev_channel_id() -> ChannelId;
@@ -21,6 +22,10 @@ impl EnvironmentTrait for Environment {
             println!("Loaded environment variables from {file}");
         }
         Environment::get_oshi_env()
+    }
+
+    fn get_database_url() -> String {
+        env::var("DATABASE_URL").expect("DATABASE_URL is missing")
     }
 
     fn get_discord_token() -> String {
