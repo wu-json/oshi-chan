@@ -62,11 +62,22 @@ pub async fn scrape_anime(id: &str) -> Anime {
     let poster_img: scraper::ElementRef = document.select(&poster_img).next().unwrap();
     let poster_img: &str = poster_img.value().attr("src").unwrap();
 
+    let total_episodes: Selector  = Selector::parse("div.info div.bmeta div.meta div").unwrap();
+    let total_episodes: Vec<scraper::ElementRef> = document.select(&&total_episodes).collect::<Vec<_>>();
+    let mut total_episodes_count: u32 = 12;
+
+    for ep in total_episodes {
+        let text: Vec<&str> = ep.text().collect::<Vec<_>>();
+        if text[0] == "Episodes: " {
+            total_episodes_count = text[1].parse::<u32>().unwrap();
+        }
+    }
+
     Anime {
         id: String::from(id),
         name: String::from(name),
         description: String::from(desc),
         poster_img_url: String::from(poster_img),
-        total_episodes: 23
+        total_episodes: total_episodes_count
     }
 }
