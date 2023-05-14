@@ -47,7 +47,7 @@ pub async fn is_episode_out(id: &str, episode: u32) -> Result<bool, IsEpisodeOut
         Err(e) => return Err(IsEpisodeOutError::BrowserTabError(e.to_string())),
     }
 
-    sleep(Duration::from_millis(500)).await;
+    sleep(Duration::from_millis(5000)).await;
 
     let new_url: String = tab.get_url();
 
