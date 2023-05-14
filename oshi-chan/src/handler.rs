@@ -34,6 +34,23 @@ impl EventHandler for Handler {
             "version" => {
                 commands::version::exec(&ctx, &msg).await;
             }
+            "watchlist" => {
+                if command_parts.len() < 3 {
+                    return;
+                }
+                match command_parts[2] {
+                    "add" => {
+                        if command_parts.len() < 5 {
+                            return;
+                        }
+                        commands::watchlist_add::exec(&ctx, &msg).await;
+                    }
+                    "list" => {
+                        commands::watchlist_list::exec(&ctx, &msg).await;
+                    }
+                    _ => (),
+                }
+            }
             _ => (),
         }
 
