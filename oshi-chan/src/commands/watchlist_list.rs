@@ -12,7 +12,10 @@ pub async fn exec(ctx: &Context, msg: &Message) {
 
     let mut list: String = String::from("");
     for entry in results {
-        list.push_str(&format!("- {} ({})\n", &entry.name, &entry.nine_anime_id));
+        list.push_str(&format!(
+            "- {} ({}/{}) ({})\n",
+            &entry.name, entry.latest_episode, entry.total_episodes, &entry.nine_anime_id
+        ));
     }
 
     let content: String = MessageBuilder::new()
