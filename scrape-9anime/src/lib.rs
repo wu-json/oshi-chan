@@ -76,6 +76,10 @@ pub enum ScrapeAnimeError {
     SetUserAgentError(String),
     #[error("Content retrieval error.")]
     ContentRetrievalError(String),
+    #[error("Selector creation error.")]
+    SelectorCreationError(String),
+    #[error("Selector not found error.")]
+    SelectorNotFoundError(String),
 }
 
 pub async fn scrape_anime(id: &str) -> Result<Anime, ScrapeAnimeError> {
@@ -115,8 +119,14 @@ pub async fn scrape_anime(id: &str) -> Result<Anime, ScrapeAnimeError> {
 
     let document: Html = Html::parse_document(&content);
 
-    let name: Selector = Selector::parse("div.info h1.title").unwrap();
-    let name: scraper::ElementRef = document.select(&name).next().unwrap();
+    let name: Selector = match Selector::parse("div.info h1.title") {
+        Ok(s) => s,
+        Err(e) => return Err(ScrapeAnimeError::SelectorCreationError(e.to_string()))
+    };
+    let name: scraper::ElementRef = match document.select(&name).next() {
+        Some(s) => s,
+        None => return Err(ScrapeAnimeError::SelectorNotFoundError(String::from("Name not found.")))
+    };
     let name: Vec<&str> = name.text().collect::<Vec<_>>();
     let name: &str = name[0];
 
