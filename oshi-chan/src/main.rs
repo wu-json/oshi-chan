@@ -37,6 +37,11 @@ async fn main() {
         .await
         .expect("Error creating serenity client");
 
+    {
+        let mut data = client.data.write().await;
+        data.insert::<PgPool>(pool);
+    }
+
     if let Err(why) = client.start().await {
         println!("Serenity client error: {:?}", why);
     }
