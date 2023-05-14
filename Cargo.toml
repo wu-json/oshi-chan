@@ -1,2 +1,2 @@
 [workspace]
-members = ["oshi-chan"]
+members = ["oshi-chan", "scrape-9anime"]
