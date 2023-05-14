@@ -8,4 +8,5 @@ edition = "2021"
 [dependencies]
 headless_chrome = "1.0.5"
 scraper = "0.16.0"
+thiserror = "1.0.40"
 tokio = { version = "1.28.0", features = ["full"] }

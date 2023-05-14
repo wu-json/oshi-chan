@@ -1,14 +1,26 @@
 use headless_chrome::Browser;
+use scraper::{Html, Selector};
+use thiserror::Error;
 use tokio::time::{sleep, Duration};
-use scraper::{Html,Selector};
+
+#[derive(Error, Debug)]
+
+pub enum IsEpisodeOutError {
+    #[error("Browser error.")]
+    BrowserError(String),
+}
 
 // This code tries to see whether an episode is out by navigating to the
 // url of the episode. 9anime will redirect the client to episode 1 url
 // if the episode is not out.
-pub async fn is_episode_out(id: &str, episode: u32) -> bool {
+pub async fn is_episode_out(id: &str, episode: u32) -> Result<bool, IsEpisodeOutError> {
     let url: String = format!("https://9anime.to/watch/{id}/ep-{episode}");
 
-    let browser: Browser = Browser::default().unwrap();
+    let browser: Browser = match Browser::default() {
+        Ok(b) => b,
+        Err(err) => return Err(IsEpisodeOutError::BrowserError(err.to_string())),
+    };
+
     let tab: std::sync::Arc<headless_chrome::Tab> = browser.new_tab().unwrap();
 
     tab.enable_stealth_mode().unwrap();
@@ -20,7 +32,7 @@ pub async fn is_episode_out(id: &str, episode: u32) -> bool {
 
     let new_url: String = tab.get_url();
 
-    new_url == url
+    Ok(new_url == url)
 }
 
 #[derive(Debug)]
@@ -62,8 +74,9 @@ pub async fn scrape_anime(id: &str) -> Anime {
     let poster_img: scraper::ElementRef = document.select(&poster_img).next().unwrap();
     let poster_img: &str = poster_img.value().attr("src").unwrap();
 
-    let total_episodes: Selector  = Selector::parse("div.info div.bmeta div.meta div").unwrap();
-    let total_episodes: Vec<scraper::ElementRef> = document.select(&&total_episodes).collect::<Vec<_>>();
+    let total_episodes: Selector = Selector::parse("div.info div.bmeta div.meta div").unwrap();
+    let total_episodes: Vec<scraper::ElementRef> =
+        document.select(&&total_episodes).collect::<Vec<_>>();
     let mut total_episodes_count: u32 = 12;
 
     for ep in total_episodes {
@@ -78,6 +91,6 @@ pub async fn scrape_anime(id: &str) -> Anime {
         name: String::from(name),
         description: String::from(desc),
         poster_img_url: String::from(poster_img),
-        total_episodes: total_episodes_count
+        total_episodes: total_episodes_count,
     }
 }
