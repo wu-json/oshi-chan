@@ -6,7 +6,7 @@ CREATE TABLE watchlist (
     post_img_url VARCHAR NOT NULL,
     latest_episode INT NOT NULL,
     total_episodes INT NOT NULL,
-    created_on TIMESTAMP NOT NULL,
+    created_on TIMESTAMP NOT NULL
 );
 
 CREATE INDEX ix_watchlist_nine_anime_id ON watchlist(nine_anime_id);

@@ -3,6 +3,7 @@ mod environment;
 mod handler;
 
 use environment::{Environment, EnvironmentTrait};
+use pg_client;
 use serenity::{framework::standard::StandardFramework, prelude::*};
 
 #[tokio::main]
@@ -15,6 +16,8 @@ async fn main() {
 
     let intents: GatewayIntents =
         GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
+
+    pg_client::connect(&Environment::get_database_url());
 
     let mut client: Client = Client::builder(&token, intents)
         .event_handler(handler::Handler)
