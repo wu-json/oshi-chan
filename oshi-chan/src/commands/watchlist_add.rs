@@ -5,6 +5,11 @@ use serenity::builder::CreateMessage;
 use serenity::{model::channel::Message, prelude::*};
 
 pub async fn exec(ctx: &Context, msg: &Message, nine_anime_id: &str, latest_episode: &str) {
+    let content: String = format!("Let me try to scrape that from 9anime.to...");
+    if let Err(why) = msg.channel_id.say(&ctx.http, content).await {
+        println!("version: error sending message: {:?}", why);
+    }
+
     let latest_ep: i32 = latest_episode.parse::<i32>().unwrap();
     let anime: scrape_9anime::Anime = scrape_anime(nine_anime_id).await.unwrap();
 
