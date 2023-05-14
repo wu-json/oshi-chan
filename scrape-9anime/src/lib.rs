@@ -114,47 +114,66 @@ pub async fn scrape_anime(id: &str) -> Result<Anime, ScrapeAnimeError> {
 
     let content: String = match tab.get_content() {
         Ok(c) => c,
-        Err(e) => return Err(ScrapeAnimeError::ContentRetrievalError(e.to_string()))
+        Err(e) => return Err(ScrapeAnimeError::ContentRetrievalError(e.to_string())),
     };
 
     let document: Html = Html::parse_document(&content);
 
     let name: Selector = match Selector::parse("div.info h1.title") {
         Ok(s) => s,
-        Err(e) => return Err(ScrapeAnimeError::SelectorCreationError(e.to_string()))
+        Err(e) => return Err(ScrapeAnimeError::SelectorCreationError(e.to_string())),
     };
     let name: scraper::ElementRef = match document.select(&name).next() {
         Some(s) => s,
-        None => return Err(ScrapeAnimeError::SelectorNotFoundError(String::from("Name not found.")))
+        None => {
+            return Err(ScrapeAnimeError::SelectorNotFoundError(String::from(
+                "Name not found.",
+            )))
+        }
     };
     let name: Vec<&str> = name.text().collect::<Vec<_>>();
     let name: &str = name[0];
 
     let desc: Selector = match Selector::parse("div.info div.shorting div.content") {
         Ok(s) => s,
-        Err(e) => return Err(ScrapeAnimeError::SelectorCreationError(e.to_string()))
+        Err(e) => return Err(ScrapeAnimeError::SelectorCreationError(e.to_string())),
     };
     let desc: scraper::ElementRef = match document.select(&desc).next() {
         Some(s) => s,
-        None => return Err(ScrapeAnimeError::SelectorNotFoundError(String::from("Description not found.")))
+        None => {
+            return Err(ScrapeAnimeError::SelectorNotFoundError(String::from(
+                "Description not found.",
+            )))
+        }
     };
     let desc: Vec<&str> = desc.text().collect::<Vec<_>>();
     let desc: &str = desc[0];
 
     let poster_img: Selector = match Selector::parse("div.binfo div.poster span img") {
         Ok(s) => s,
-        Err(e) => return Err(ScrapeAnimeError::SelectorCreationError(e.to_string()))
+        Err(e) => return Err(ScrapeAnimeError::SelectorCreationError(e.to_string())),
     };
-    let poster_img:scraper::ElementRef = match document.select(&poster_img).next() {
+    let poster_img: scraper::ElementRef = match document.select(&poster_img).next() {
         Some(s) => s,
-        None => return Err(ScrapeAnimeError::SelectorNotFoundError(String::from("Poster image not found.")))
+        None => {
+            return Err(ScrapeAnimeError::SelectorNotFoundError(String::from(
+                "Poster image not found.",
+            )))
+        }
     };
     let poster_img: &str = match poster_img.value().attr("src") {
         Some(s) => s,
-        None => return Err(ScrapeAnimeError::SelectorNotFoundError(String::from("Poster image src attribute not found.")))
+        None => {
+            return Err(ScrapeAnimeError::SelectorNotFoundError(String::from(
+                "Poster image src attribute not found.",
+            )))
+        }
     };
 
-    let total_episodes: Selector = Selector::parse("div.info div.bmeta div.meta div").unwrap();
+    let total_episodes: Selector = match Selector::parse("div.info div.bmeta div.meta div") {
+        Ok(s) => s,
+        Err(e) => return Err(ScrapeAnimeError::SelectorCreationError(e.to_string())),
+    };
     let total_episodes: Vec<scraper::ElementRef> =
         document.select(&&total_episodes).collect::<Vec<_>>();
     let mut total_episodes_count: u32 = 12;
@@ -162,7 +181,14 @@ pub async fn scrape_anime(id: &str) -> Result<Anime, ScrapeAnimeError> {
     for ep in total_episodes {
         let text: Vec<&str> = ep.text().collect::<Vec<_>>();
         if text[0] == "Episodes: " {
-            total_episodes_count = text[1].parse::<u32>().unwrap();
+            total_episodes_count = match text[1].parse::<u32>() {
+                Ok(c) => c,
+                Err(_) => {
+                    println!("Error parsing total episode count. Falling back on default ({}).", total_episodes_count);
+                    total_episodes_count
+                },
+            };
+            break;
         }
     }
 
