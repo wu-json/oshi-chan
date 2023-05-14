@@ -1,8 +1,11 @@
 use crate::PgPool;
+use serenity::model::channel::Embed;
+use serenity::{model::channel::Message, prelude::*, utils::MessageBuilder};
 
-use pg_client::{ConnectionManager, PooledConnection, PgConnection, Pool, models};
+use pg_client::{models, ConnectionManager, PgConnection, Pool, PooledConnection};
 use scrape_9anime::scrape_anime;
-use serenity::{model::channel::Message, prelude::*};
+use serenity::prelude::*;
+use serenity::{builder::CreateMessage, model::channel::ReactionType};
 
 pub async fn exec(ctx: &Context, msg: &Message, nine_anime_id: &str, latest_episode: &str) {
     let latest_ep: i32 = latest_episode.parse::<i32>().unwrap();
@@ -14,12 +17,32 @@ pub async fn exec(ctx: &Context, msg: &Message, nine_anime_id: &str, latest_epis
         nine_anime_id,
         post_img_url: &anime.poster_img_url,
         latest_episode: latest_ep,
-        total_episodes: anime.total_episodes as i32
+        total_episodes: anime.total_episodes as i32,
     };
 
     let mut data: tokio::sync::RwLockReadGuard<TypeMap> = ctx.data.read().await;
     let pool: &Pool<ConnectionManager<PgConnection>> = data.get::<PgPool>().unwrap();
-    let connection: &mut PooledConnection<ConnectionManager<PgConnection>> = &mut pool.get().unwrap();
+    let connection: &mut PooledConnection<ConnectionManager<PgConnection>> =
+        &mut pool.get().unwrap();
 
     pg_client::add_watchlist_entry(connection, &entry);
+
+    let mut message = CreateMessage::default();
+    message.embed(|e| {
+        e.colour(0x800080)
+            .thumbnail(anime.poster_img_url)
+            .title(format!("\"{}\" added to watchlist!", &anime.name))
+            .description(&anime.description)
+    });
+
+    if let Err(why) = msg
+        .channel_id
+        .send_message(&ctx.http, |m| {
+            *m = message;
+            m
+        })
+        .await
+    {
+        println!("watchlist_add: error sending message: {:?}", why);
+    }
 }
