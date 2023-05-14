@@ -5,7 +5,8 @@ pub use diesel::pg::PgConnection;
 pub use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
 use diesel::RunQueryDsl;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
-use models::NewWatchListEntry;
+use models::{NewWatchListEntry, WatchList};
+use schema::watchlist::dsl::*;
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 
@@ -30,4 +31,10 @@ pub fn add_watchlist_entry(connection: &mut PgConnection, entry: &NewWatchListEn
         .values(entry)
         .execute(connection)
         .unwrap();
+}
+
+pub fn get_watchlist(connection: &mut PgConnection) -> Vec<WatchList> {
+    watchlist
+        .load::<WatchList>(connection)
+        .expect("Error loading watchlist")
 }
