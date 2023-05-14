@@ -47,20 +47,26 @@ pub async fn scrape_anime(id: &str) -> Anime {
 
     let content: String = tab.get_content().unwrap();
     let document: Html = Html::parse_document(&content);
-    let name_selector:Selector = Selector::parse("div.info h1.title").unwrap();
 
-    let name_elem = document.select(&name_selector).next().unwrap();
-    let name: Vec<&str> = name_elem.text().collect::<Vec<_>>();
+    let name: Selector = Selector::parse("div.info h1.title").unwrap();
+    let name: scraper::ElementRef = document.select(&name).next().unwrap();
+    let name: Vec<&str> = name.text().collect::<Vec<_>>();
+    let name: &str = name[0];
 
+    let desc: Selector = Selector::parse("div.info div.shorting div.content").unwrap();
+    let desc: scraper::ElementRef = document.select(&desc).next().unwrap();
+    let desc: Vec<&str> = desc.text().collect::<Vec<_>>();
+    let desc: &str = desc[0];
 
-
-
+    let poster_img: Selector = Selector::parse("div.binfo div.poster span img").unwrap();
+    let poster_img: scraper::ElementRef = document.select(&poster_img).next().unwrap();
+    let poster_img: &str = poster_img.value().attr("src").unwrap();
 
     Anime {
-        id: String::from(""),
-        name: String::from(name[0]),
-        description: String::from(""),
-        poster_img_url: String::from(""),
+        id: String::from(id),
+        name: String::from(name),
+        description: String::from(desc),
+        poster_img_url: String::from(poster_img),
         total_episodes: 23
     }
 }
