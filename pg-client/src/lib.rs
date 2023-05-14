@@ -1,3 +1,6 @@
+pub mod models;
+pub mod schema;
+
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
