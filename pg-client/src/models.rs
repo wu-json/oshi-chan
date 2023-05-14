@@ -1,5 +1,6 @@
 use crate::schema::watchlist;
 use diesel::prelude::*;
+use diesel::sql_types::{Timestamp};
 
 #[derive(Queryable)]
 pub struct WatchList {
