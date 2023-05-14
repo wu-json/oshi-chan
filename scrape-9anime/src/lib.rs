@@ -35,17 +35,17 @@ pub async fn is_episode_out(id: &str, episode: u32) -> Result<bool, IsEpisodeOut
     match tab.enable_stealth_mode() {
         Ok(_) => {}
         Err(e) => return Err(IsEpisodeOutError::StealthModeError(e.to_string())),
-    }
+    };
 
     match tab.set_user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36", Some("en-US,en;q=0.9,hi;q=0.8,es;q=0.7,lt;q=0.6"), Some("macOS")) {
         Ok(_) => {},
         Err(e) => return Err(IsEpisodeOutError::SetUserAgentError(e.to_string()))
-    }
+    };
 
     match tab.navigate_to(&url) {
         Ok(_) => {}
         Err(e) => return Err(IsEpisodeOutError::BrowserTabError(e.to_string())),
-    }
+    };
 
     sleep(Duration::from_millis(5000)).await;
 
@@ -74,6 +74,8 @@ pub enum ScrapeAnimeError {
     StealthModeError(String),
     #[error("Set user agent error.")]
     SetUserAgentError(String),
+    #[error("Content retrieval error.")]
+    ContentRetrievalError(String),
 }
 
 pub async fn scrape_anime(id: &str) -> Result<Anime, ScrapeAnimeError> {
@@ -92,21 +94,25 @@ pub async fn scrape_anime(id: &str) -> Result<Anime, ScrapeAnimeError> {
     match tab.enable_stealth_mode() {
         Ok(_) => {}
         Err(e) => return Err(ScrapeAnimeError::StealthModeError(e.to_string())),
-    }
+    };
 
     match tab.set_user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36", Some("en-US,en;q=0.9,hi;q=0.8,es;q=0.7,lt;q=0.6"), Some("macOS")) {
         Ok(_) => {},
         Err(e) => return Err(ScrapeAnimeError::SetUserAgentError(e.to_string()))
-    }
+    };
 
     match tab.navigate_to(&url) {
         Ok(_) => {}
         Err(e) => return Err(ScrapeAnimeError::BrowserTabError(e.to_string())),
-    }
+    };
 
     sleep(Duration::from_millis(5000)).await;
 
-    let content: String = tab.get_content().unwrap();
+    let content: String = match tab.get_content() {
+        Ok(c) => c,
+        Err(e) => return Err(ScrapeAnimeError::ContentRetrievalError(e.to_string()))
+    };
+
     let document: Html = Html::parse_document(&content);
 
     let name: Selector = Selector::parse("div.info h1.title").unwrap();
@@ -135,11 +141,11 @@ pub async fn scrape_anime(id: &str) -> Result<Anime, ScrapeAnimeError> {
         }
     }
 
-    Anime {
+    Ok(Anime {
         id: String::from(id),
         name: String::from(name),
         description: String::from(desc),
         poster_img_url: String::from(poster_img),
         total_episodes: total_episodes_count,
-    }
+    })
 }
