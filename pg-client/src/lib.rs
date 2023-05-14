@@ -12,4 +12,5 @@ pub fn connect(database_url: &str) -> PgConnection {
 
 pub fn migrate(connection: &mut impl MigrationHarness<diesel::pg::Pg>) {
     connection.run_pending_migrations(MIGRATIONS).expect("Migration failed");
+    println!("Successfully completed Postgres migrations")
 }
