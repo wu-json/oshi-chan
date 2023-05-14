@@ -1,7 +1,5 @@
 use headless_chrome::Browser;
 use tokio::time::{sleep, Duration};
-use headless_chrome::protocol::cdp::Page;
-
 
 // This code tries to see whether an episode is out by navigating to the
 // url of the episode. 9anime will redirect the client to episode 1 url
@@ -20,17 +18,7 @@ pub async fn is_episode_out(id: &str, episode: u32) -> bool {
 
     sleep(Duration::from_millis(5000)).await;
 
-    let _jpeg_data = tab.capture_screenshot(
-        Page::CaptureScreenshotFormatOption::Jpeg,
-        None,
-        None,
-        true).unwrap();
-
-    std::fs::write("foo.jpg", _jpeg_data).expect("Failed to write foo.jpg file");
-
     let new_url: String = tab.get_url();
-
-    println!("New url: {}", new_url);
 
     new_url == url
 }
