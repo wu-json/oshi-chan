@@ -1,11 +1,8 @@
 use crate::PgPool;
-use serenity::model::channel::Embed;
-use serenity::{model::channel::Message, prelude::*, utils::MessageBuilder};
-
 use pg_client::{models, ConnectionManager, PgConnection, Pool, PooledConnection};
 use scrape_9anime::scrape_anime;
-use serenity::prelude::*;
-use serenity::{builder::CreateMessage, model::channel::ReactionType};
+use serenity::builder::CreateMessage;
+use serenity::{model::channel::Message, prelude::*};
 
 pub async fn exec(ctx: &Context, msg: &Message, nine_anime_id: &str, latest_episode: &str) {
     let latest_ep: i32 = latest_episode.parse::<i32>().unwrap();
