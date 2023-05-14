@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 diesel = { version = "2.0.4", features = ["postgres"] }
+diesel_migrations = "2.0.0"

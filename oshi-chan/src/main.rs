@@ -1,3 +1,5 @@
+extern crate diesel;
+
 mod commands;
 mod environment;
 mod handler;
@@ -17,7 +19,8 @@ async fn main() {
     let intents: GatewayIntents =
         GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
 
-    pg_client::connect(&Environment::get_database_url());
+    let connection = pg_client::connect(&Environment::get_database_url());
+    connection.run
 
     let mut client: Client = Client::builder(&token, intents)
         .event_handler(handler::Handler)
