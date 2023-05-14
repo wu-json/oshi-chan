@@ -141,9 +141,18 @@ pub async fn scrape_anime(id: &str) -> Result<Anime, ScrapeAnimeError> {
     let desc: Vec<&str> = desc.text().collect::<Vec<_>>();
     let desc: &str = desc[0];
 
-    let poster_img: Selector = Selector::parse("div.binfo div.poster span img").unwrap();
-    let poster_img: scraper::ElementRef = document.select(&poster_img).next().unwrap();
-    let poster_img: &str = poster_img.value().attr("src").unwrap();
+    let poster_img: Selector = match Selector::parse("div.binfo div.poster span img") {
+        Ok(s) => s,
+        Err(e) => return Err(ScrapeAnimeError::SelectorCreationError(e.to_string()))
+    };
+    let poster_img:scraper::ElementRef = match document.select(&poster_img).next() {
+        Some(s) => s,
+        None => return Err(ScrapeAnimeError::SelectorNotFoundError(String::from("Poster image not found.")))
+    };
+    let poster_img: &str = match poster_img.value().attr("src") {
+        Some(s) => s,
+        None => return Err(ScrapeAnimeError::SelectorNotFoundError(String::from("Poster image src attribute not found.")))
+    };
 
     let total_episodes: Selector = Selector::parse("div.info div.bmeta div.meta div").unwrap();
     let total_episodes: Vec<scraper::ElementRef> =
