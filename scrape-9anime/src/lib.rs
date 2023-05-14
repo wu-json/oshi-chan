@@ -63,18 +63,48 @@ pub struct Anime {
     pub total_episodes: u32,
 }
 
-pub async fn scrape_anime(id: &str) -> Anime {
+#[derive(Error, Debug)]
+
+pub enum ScrapeAnimeError {
+    #[error("Browser error.")]
+    BrowserError(String),
+    #[error("Browser tab error.")]
+    BrowserTabError(String),
+    #[error("Stealth mode error.")]
+    StealthModeError(String),
+    #[error("Set user agent error.")]
+    SetUserAgentError(String),
+}
+
+pub async fn scrape_anime(id: &str) -> Result<Anime, ScrapeAnimeError> {
     let url: String = format!("https://9anime.to/watch/{id}");
 
-    let browser: Browser = Browser::default().unwrap();
-    let tab: std::sync::Arc<headless_chrome::Tab> = browser.new_tab().unwrap();
+    let browser: Browser = match Browser::default() {
+        Ok(b) => b,
+        Err(e) => return Err(ScrapeAnimeError::BrowserError(e.to_string())),
+    };
 
-    tab.enable_stealth_mode().unwrap();
-    tab.set_user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36", Some("en-US,en;q=0.9,hi;q=0.8,es;q=0.7,lt;q=0.6"), Some("macOS")).unwrap();
+    let tab: std::sync::Arc<headless_chrome::Tab> = match browser.new_tab() {
+        Ok(t) => t,
+        Err(e) => return Err(ScrapeAnimeError::BrowserTabError(e.to_string())),
+    };
 
-    tab.navigate_to(&url).unwrap();
+    match tab.enable_stealth_mode() {
+        Ok(_) => {}
+        Err(e) => return Err(ScrapeAnimeError::StealthModeError(e.to_string())),
+    }
 
-    sleep(Duration::from_millis(3000)).await;
+    match tab.set_user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36", Some("en-US,en;q=0.9,hi;q=0.8,es;q=0.7,lt;q=0.6"), Some("macOS")) {
+        Ok(_) => {},
+        Err(e) => return Err(ScrapeAnimeError::SetUserAgentError(e.to_string()))
+    }
+
+    match tab.navigate_to(&url) {
+        Ok(_) => {}
+        Err(e) => return Err(ScrapeAnimeError::BrowserTabError(e.to_string())),
+    }
+
+    sleep(Duration::from_millis(5000)).await;
 
     let content: String = tab.get_content().unwrap();
     let document: Html = Html::parse_document(&content);
