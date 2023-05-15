@@ -72,6 +72,7 @@ async fn main() {
         .await
         .unwrap();
 
+    #[cfg(feature = "signal")]
     sched.shutdown_on_ctrl_c();
     sched.set_shutdown_handler(Box::new(|| {
         Box::pin(async move {
