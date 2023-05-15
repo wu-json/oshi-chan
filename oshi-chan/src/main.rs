@@ -1,6 +1,7 @@
 mod commands;
 mod environment;
 mod handler;
+mod jobs;
 
 use environment::{Environment, EnvironmentTrait};
 use pg_client::{ConnectionManager, PgConnection, Pool};
