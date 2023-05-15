@@ -19,9 +19,17 @@ pub async fn exec(http: &Arc<Http>, pool: &Pool<ConnectionManager<PgConnection>>
         }
 
         let new_episode: u32 = (anime.latest_episode + 1) as u32;
-        let new_episode_out = is_episode_out(&anime.nine_anime_id, new_episode)
-            .await
-            .unwrap();
+        let new_episode_out: bool = match is_episode_out(&anime.nine_anime_id, new_episode).await {
+            Ok(v) => v,
+            Err(err) => {
+                println!(
+                    "Error occurred while checking for new releases for {}: {}",
+                    &anime.nine_anime_id,
+                    err.to_string()
+                );
+                false
+            }
+        };
 
         if new_episode_out {
             pg_client::update_watchlist_entry(connection, &anime.nine_anime_id, new_episode as i32);
@@ -30,7 +38,7 @@ pub async fn exec(http: &Arc<Http>, pool: &Pool<ConnectionManager<PgConnection>>
     }
 
     println!("Found {} new releases", new_releases.len());
-    
+
     let channel_id = Environment::get_oshi_general_channel_id();
     for anime in new_releases {
         let mut message = CreateMessage::default();
