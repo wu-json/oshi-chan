@@ -9,6 +9,7 @@ pub trait EnvironmentTrait {
     fn get_discord_token() -> String;
     fn get_oshi_env() -> String;
     fn get_oshi_dev_channel_id() -> ChannelId;
+    fn get_oshi_general_channel_id() -> ChannelId;
     fn get_oshi_version() -> &'static str;
 }
 
@@ -34,6 +35,12 @@ impl EnvironmentTrait for Environment {
 
     fn get_oshi_env() -> String {
         env::var("OSHI_ENV").expect("OSHI_ENV is missing")
+    }
+
+    fn get_oshi_general_channel_id() -> ChannelId {
+        let env_str: String =
+            env::var("OSHI_GENERAL_CHANNEL_ID").expect("OSHI_DEVELOPMENT_CHANNEL_ID");
+        ChannelId(env_str.parse::<u64>().unwrap())
     }
 
     fn get_oshi_dev_channel_id() -> ChannelId {

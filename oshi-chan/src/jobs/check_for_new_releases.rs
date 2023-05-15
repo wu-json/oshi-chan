@@ -28,4 +28,8 @@ pub async fn exec(ctx: &Context) {
             new_releases.push(anime);
         }
     }
+
+    for anime in new_releases {
+        
+    }
 }
