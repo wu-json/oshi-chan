@@ -6,8 +6,7 @@ mod jobs;
 use environment::{Environment, EnvironmentTrait};
 use pg_client::{ConnectionManager, PgConnection, Pool};
 use serenity::{framework::standard::StandardFramework, prelude::*};
-use std::sync::Arc;
-use tokio_cron_scheduler::{Job, JobScheduler, JobSchedulerError};
+use tokio_cron_scheduler::{Job, JobScheduler};
 
 pub struct PgPool;
 
@@ -52,11 +51,11 @@ async fn main() {
 
     sched
         .add(
-            Job::new_async("1/7 * * * * *", move |uuid, mut l| {
+            Job::new_async("0 1/2 * * * *", move |uuid, mut l| {
                 let http = http.clone();
                 let pool = pool_copy.clone();
                 Box::pin(async move {
-                    println!("I run async every 7 seconds");
+                    println!("Running check for new releases job");
 
                     jobs::check_for_new_releases::exec(&http, &pool).await;
 
@@ -72,6 +71,15 @@ async fn main() {
         )
         .await
         .unwrap();
+
+    sched.shutdown_on_ctrl_c();
+    sched.set_shutdown_handler(Box::new(|| {
+        Box::pin(async move {
+            println!("Shut down done");
+        })
+    }));
+
+    sched.start().await.unwrap();
 
     if let Err(why) = client.start().await {
         println!("Serenity client error: {:?}", why);
