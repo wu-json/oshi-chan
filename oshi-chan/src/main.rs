@@ -62,8 +62,8 @@ async fn main() {
                     // Query the next execution time for this job
                     let next_tick = l.next_tick_for_job(uuid).await;
                     match next_tick {
-                        Ok(Some(ts)) => println!("Next time for 7s job is {:?}", ts),
-                        _ => println!("Could not get next tick for 7s job"),
+                        Ok(Some(ts)) => println!("Next time for new releases job is {:?}", ts),
+                        _ => println!("Could not get next tick for new releases job"),
                     }
                 })
             })
