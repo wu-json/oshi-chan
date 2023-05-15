@@ -5,7 +5,7 @@ use serenity::builder::CreateMessage;
 use serenity::http::Http;
 use std::sync::Arc;
 
-pub async fn exec(http: &Arc<Http>, pool: &Pool<ConnectionManager<PgConnection>> ) {
+pub async fn exec(http: &Arc<Http>, pool: &Pool<ConnectionManager<PgConnection>>) {
     let connection: &mut PooledConnection<ConnectionManager<PgConnection>> =
         &mut pool.get().unwrap();
 
@@ -29,6 +29,8 @@ pub async fn exec(http: &Arc<Http>, pool: &Pool<ConnectionManager<PgConnection>>
         }
     }
 
+    println!("Found {} new releases", new_releases.len());
+    
     let channel_id = Environment::get_oshi_general_channel_id();
     for anime in new_releases {
         let mut message = CreateMessage::default();

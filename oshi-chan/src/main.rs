@@ -51,7 +51,7 @@ async fn main() {
 
     sched
         .add(
-            Job::new_async("0 1/1 * * * *", move |uuid, mut l| {
+            Job::new_async("0 1/15 * * * *", move |uuid, mut l| {
                 let http = http.clone();
                 let pool = pool_copy.clone();
                 Box::pin(async move {
