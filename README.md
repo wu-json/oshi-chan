@@ -16,6 +16,13 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ENV_FILE=.env.development cargo run -p oshi-chan
 ```
 
+### Build the Docker Image
+Oshi-chan is dockerized and deployed on Fly.io. If you want to build the container locally, you can run. Note that the `--platform` argument is very important if you are trying to do this on an M1 Mac, otherwise you may be building with the wrong architecture.
+
+```bash
+docker build --platform linux/amd64 . -f oshi-chan/Dockerfile
+```
+
 ## Usage
 
 You can get a list of available commands by typing `!oshi` in the Discord channel. Oshi should respond to any channel except for `#oshi-development`, which is reserved for local testing.
