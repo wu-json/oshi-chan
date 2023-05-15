@@ -12,6 +12,8 @@ pub async fn exec(http: &Arc<Http>, pool: &Pool<ConnectionManager<PgConnection>>
     let results: Vec<models::WatchList> = pg_client::get_watchlist(connection);
     let mut new_releases: Vec<models::WatchList> = Vec::new();
 
+    println!("Checking for new releases for {} shows", results.len());
+
     for anime in results {
         // series is finished so we exit
         if anime.latest_episode + 1 > anime.total_episodes {
@@ -30,6 +32,17 @@ pub async fn exec(http: &Arc<Http>, pool: &Pool<ConnectionManager<PgConnection>>
                 false
             }
         };
+
+        println!(
+            "{}: episode {} {}",
+            anime.nine_anime_id,
+            new_episode,
+            if new_episode_out {
+                "is out!"
+            } else {
+                "is not out"
+            }
+        );
 
         if new_episode_out {
             pg_client::update_watchlist_entry(connection, &anime.nine_anime_id, new_episode as i32);

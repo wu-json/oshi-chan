@@ -55,9 +55,9 @@ async fn main() {
                 let http = http.clone();
                 let pool = pool_copy.clone();
                 Box::pin(async move {
-                    println!("Running check for new releases job");
-
+                    println!("New releases job started");
                     jobs::check_for_new_releases::exec(&http, &pool).await;
+                    println!("New releases job completed");
 
                     // Query the next execution time for this job
                     let next_tick = l.next_tick_for_job(uuid).await;
