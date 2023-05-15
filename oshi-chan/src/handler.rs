@@ -43,7 +43,19 @@ impl EventHandler for Handler {
                         if command_parts.len() < 5 {
                             return;
                         }
-                        commands::watchlist_add::exec(&ctx, &msg, command_parts[3], command_parts[4]).await;
+                        commands::watchlist_add::exec(
+                            &ctx,
+                            &msg,
+                            command_parts[3],
+                            command_parts[4],
+                        )
+                        .await;
+                    }
+                    "delete" => {
+                        if command_parts.len() < 4 {
+                            return;
+                        }
+                        commands::watchlist_delete::exec(&ctx, &msg, command_parts[3]).await;
                     }
                     "list" => {
                         commands::watchlist_list::exec(&ctx, &msg).await;
