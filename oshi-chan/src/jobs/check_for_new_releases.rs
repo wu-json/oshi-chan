@@ -1,6 +1,6 @@
 use crate::PgPool;
 use pg_client::{models, ConnectionManager, PgConnection, Pool, PooledConnection};
-use scrape_9anime::scrape_anime;
+use scrape_9anime::is_episode_out;
 use serenity::{model::channel::Message, prelude::*, utils::MessageBuilder};
 
 pub async fn exec(ctx: &Context) {
@@ -19,11 +19,12 @@ pub async fn exec(ctx: &Context) {
         }
 
         let new_episode: u32 = (anime.latest_episode + 1) as u32;
-        let new_episode_out = scrape_9anime::is_episode_out(&anime.nine_anime_id, new_episode)
+        let new_episode_out = is_episode_out(&anime.nine_anime_id, new_episode)
             .await
             .unwrap();
 
         if new_episode_out {
+            pg_client::update_watchlist_entry(connection, &anime.nine_anime_id, new_episode as i32);
             new_releases.push(anime);
         }
     }
