@@ -40,6 +40,17 @@ pub fn get_watchlist(connection: &mut PgConnection) -> Vec<WatchList> {
         .expect("Error loading watchlist")
 }
 
+pub fn update_watchlist_entry(
+    connection: &mut PgConnection,
+    anime_id: &str,
+    new_latest_episode: i32,
+) {
+    diesel::update(watchlist.filter(nine_anime_id.eq(anime_id)))
+        .set(latest_episode.eq(new_latest_episode))
+        .execute(connection)
+        .unwrap();
+}
+
 pub fn delete_watchlist_entry(connection: &mut PgConnection, anime_id: &str) {
     diesel::delete(watchlist.filter(nine_anime_id.eq(anime_id)))
         .execute(connection)
