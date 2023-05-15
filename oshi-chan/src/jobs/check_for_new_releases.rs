@@ -1,6 +1,8 @@
+use crate::environment::{Environment, EnvironmentTrait};
 use crate::PgPool;
 use pg_client::{models, ConnectionManager, PgConnection, Pool, PooledConnection};
 use scrape_9anime::is_episode_out;
+use serenity::builder::CreateMessage;
 use serenity::{model::channel::Message, prelude::*, utils::MessageBuilder};
 
 pub async fn exec(ctx: &Context) {
@@ -29,7 +31,32 @@ pub async fn exec(ctx: &Context) {
         }
     }
 
+    let channel_id = Environment::get_oshi_general_channel_id();
     for anime in new_releases {
-        
+        let mut message = CreateMessage::default();
+        message.embed(|e| {
+            e.colour(0x800080)
+                .thumbnail(anime.post_img_url)
+                .title(format!(
+                    "\"{}\" episode {} is out!",
+                    &anime.name,
+                    anime.latest_episode + 1
+                ))
+                .description(format!(
+                    "Check it out at https://9anime.to/watch/{}/ep-{}",
+                    anime.nine_anime_id,
+                    anime.latest_episode + 1
+                ))
+        });
+
+        if let Err(why) = channel_id
+            .send_message(&ctx.http, |m| {
+                *m = message;
+                m
+            })
+            .await
+        {
+            println!("check_for_new_releases: error sending message: {:?}", why);
+        }
     }
 }
