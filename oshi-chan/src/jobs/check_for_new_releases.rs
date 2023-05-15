@@ -3,7 +3,7 @@ use crate::PgPool;
 use pg_client::{models, ConnectionManager, PgConnection, Pool, PooledConnection};
 use scrape_9anime::is_episode_out;
 use serenity::builder::CreateMessage;
-use serenity::{model::channel::Message, prelude::*, utils::MessageBuilder};
+use serenity::prelude::*;
 
 pub async fn exec(ctx: &Context) {
     let data: tokio::sync::RwLockReadGuard<TypeMap> = ctx.data.read().await;
