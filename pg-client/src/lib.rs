@@ -40,8 +40,8 @@ pub fn get_watchlist(connection: &mut PgConnection) -> Vec<WatchList> {
         .expect("Error loading watchlist")
 }
 
-pub fn delete_watchlist_entry(connection: &mut PgConnection, some_id: &str) {
-    diesel::delete(watchlist.filter(nine_anime_id.eq(some_id)))
+pub fn delete_watchlist_entry(connection: &mut PgConnection, anime_id: &str) {
+    diesel::delete(watchlist.filter(nine_anime_id.eq(anime_id)))
         .execute(connection)
         .unwrap();
 }
