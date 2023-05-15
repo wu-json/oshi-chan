@@ -1,13 +1,11 @@
 use crate::environment::{Environment, EnvironmentTrait};
-use crate::PgPool;
 use pg_client::{models, ConnectionManager, PgConnection, Pool, PooledConnection};
 use scrape_9anime::is_episode_out;
 use serenity::builder::CreateMessage;
-use serenity::prelude::*;
+use serenity::http::Http;
+use std::sync::Arc;
 
-pub async fn exec(ctx: &Context) {
-    let data: tokio::sync::RwLockReadGuard<TypeMap> = ctx.data.read().await;
-    let pool: &Pool<ConnectionManager<PgConnection>> = data.get::<PgPool>().unwrap();
+pub async fn exec(http: &Arc<Http>, pool: &Pool<ConnectionManager<PgConnection>> ) {
     let connection: &mut PooledConnection<ConnectionManager<PgConnection>> =
         &mut pool.get().unwrap();
 
@@ -50,7 +48,7 @@ pub async fn exec(ctx: &Context) {
         });
 
         if let Err(why) = channel_id
-            .send_message(&ctx.http, |m| {
+            .send_message(&http, |m| {
                 *m = message;
                 m
             })
