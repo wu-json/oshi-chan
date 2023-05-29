@@ -30,3 +30,8 @@ docker build --platform linux/amd64 . -f oshi-chan/Dockerfile
 ## Usage
 
 You can get a list of available commands by typing `!oshi` in the Discord channel. Oshi should respond to any channel except for `#oshi-development`, which is reserved for local testing.
+
+## Feature Backlog
+
+- Birthday reminders
+- Music player
