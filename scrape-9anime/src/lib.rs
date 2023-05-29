@@ -1,3 +1,5 @@
+mod browser_utils;
+
 use headless_chrome::Browser;
 use scraper::{Html, Selector};
 use thiserror::Error;
