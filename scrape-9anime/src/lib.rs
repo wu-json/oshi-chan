@@ -27,9 +27,9 @@ pub async fn is_episode_out(id: &str, episode: u32) -> Result<bool, IsEpisodeOut
         .wait_until_navigated()
         .map_err(|e| IsEpisodeOutError::TabNavigateError(e.to_string()))?;
 
-    // wait longer here since we aren't in a huge rush and want to make sure
-    // the result is accurate
-    // sleep(Duration::from_millis(10000)).await;
+    // small buffer to be extra sure redirect occurred if episode is not out
+    sleep(Duration::from_millis(1000)).await;
+
     Ok(tab.get_url() == url)
 }
 
