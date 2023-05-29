@@ -16,37 +16,31 @@ impl serenity::prelude::TypeMapKey for PgPool {
 
 #[tokio::main]
 async fn main() {
-    let oshi_env: String = Environment::init();
+    let oshi_env = Environment::init();
     println!("Starting oshi-chan in {oshi_env} environment");
 
-    let framework: StandardFramework = StandardFramework::new();
-    let token: String = Environment::get_discord_token();
+    let framework = StandardFramework::new();
+    let token = Environment::get_discord_token();
+    let intents = GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
 
-    let intents: GatewayIntents =
-        GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
-
-    let pool: Pool<ConnectionManager<PgConnection>> =
-        pg_client::create_connection_pool(&Environment::get_database_url());
+    let pool = pg_client::create_connection_pool(&Environment::get_database_url());
     {
-        let connection: &mut pg_client::PooledConnection<ConnectionManager<PgConnection>> =
-            &mut pool.get().unwrap();
+        let connection = &mut pool.get().unwrap();
         pg_client::migrate(connection);
     };
-
     let pool_copy = pool.clone();
 
-    let mut client: Client = Client::builder(&token, intents)
+    let mut client = Client::builder(&token, intents)
         .event_handler(handler::Handler)
         .framework(framework)
         .await
         .expect("Error creating serenity client");
     {
-        let mut data: tokio::sync::RwLockWriteGuard<TypeMap> = client.data.write().await;
+        let mut data = client.data.write().await;
         data.insert::<PgPool>(pool);
     }
 
     let mut sched = JobScheduler::new().await.unwrap();
-
     let http = client.cache_and_http.http.clone();
 
     sched
