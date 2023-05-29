@@ -41,11 +41,11 @@ async fn main() {
     }
 
     let mut sched = JobScheduler::new().await.unwrap();
-    let job_factories = [jobs::check_for_new_releases::make_job];
-    for make_job in job_factories {
+    let jobs = [jobs::check_for_new_releases::make_job];
+    for job in jobs {
         let http_clone = client.cache_and_http.http.clone();
         let pool_clone = pool.clone();
-        sched.add(make_job(http_clone, pool_clone)).await.unwrap();
+        sched.add(job(http_clone, pool_clone)).await.unwrap();
     }
 
     #[cfg(feature = "signal")]
