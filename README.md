@@ -13,6 +13,10 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 ### Build and Start the Program
 ```bash
+# proxy flyio postgres to local
+fly proxy 5432 -a oshi-chan-pg
+
+# start oshi
 ENV_FILE=.env.development cargo run -p oshi-chan
 ```
 
