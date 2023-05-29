@@ -28,8 +28,8 @@ async fn main() {
         let connection = &mut pool.get().unwrap();
         pg_client::migrate(connection);
     };
-    let pool_copy = pool.clone();
 
+    let discord_client_pool = pool.clone();
     let mut client = Client::builder(&token, intents)
         .event_handler(handler::Handler)
         .framework(framework)
@@ -37,7 +37,7 @@ async fn main() {
         .expect("Error creating serenity client");
     {
         let mut data = client.data.write().await;
-        data.insert::<PgPool>(pool);
+        data.insert::<PgPool>(discord_client_pool);
     }
 
     let mut sched = JobScheduler::new().await.unwrap();
@@ -47,7 +47,7 @@ async fn main() {
         .add(
             Job::new_async("0 1/15 * * * *", move |uuid, mut l| {
                 let http = http.clone();
-                let pool = pool_copy.clone();
+                let pool = pool.clone();
                 Box::pin(async move {
                     println!("New releases job started");
                     jobs::check_for_new_releases::exec(&http, &pool).await;
