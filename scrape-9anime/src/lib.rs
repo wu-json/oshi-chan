@@ -15,9 +15,9 @@ pub enum IsEpisodeOutError {
     SetUserAgentError(String),
 }
 
-// This code tries to see whether an episode is out by navigating to the
-// url of the episode. 9anime will redirect the client to episode 1 url
-// if the episode is not out.
+/// Checks whether an episode is out by navigating to the url of the episode.
+/// 9anime will redirect the client to episode 1 url if the episode is not out,
+/// otherwise it will render the episode page.
 pub async fn is_episode_out(id: &str, episode: u32) -> Result<bool, IsEpisodeOutError> {
     let url: String = format!("https://9anime.to/watch/{id}/ep-{episode}");
 
