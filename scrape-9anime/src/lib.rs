@@ -45,14 +45,10 @@ pub struct Anime {
 #[derive(Error, Debug)]
 
 pub enum ScrapeAnimeError {
-    #[error("Browser error.")]
-    BrowserError(String),
-    #[error("Browser tab error.")]
-    BrowserTabError(String),
-    #[error("Stealth mode error.")]
-    StealthModeError(String),
-    #[error("Set user agent error.")]
-    SetUserAgentError(String),
+    #[error("Create browser tab error.")]
+    CreateBrowserTabError(browser_utils::CreateBrowserTabError),
+    #[error("Tab navigate error.")]
+    TabNavigateError(String),
     #[error("Content retrieval error.")]
     ContentRetrievalError(String),
     #[error("Selector creation error.")]
@@ -62,34 +58,17 @@ pub enum ScrapeAnimeError {
 }
 
 pub async fn scrape_anime(id: &str) -> Result<Anime, ScrapeAnimeError> {
-    let url: String = format!("https://9anime.to/watch/{id}");
+    let url = format!("https://9anime.to/watch/{id}");
+    let (_browser, tab) = BrowserUtils::create_browser_tab()
+        .map_err(|e| ScrapeAnimeError::CreateBrowserTabError(e))?;
 
-    let browser: Browser = match Browser::default() {
-        Ok(b) => b,
-        Err(e) => return Err(ScrapeAnimeError::BrowserError(e.to_string())),
-    };
+    tab.navigate_to(&url)
+        .map_err(|e| ScrapeAnimeError::TabNavigateError(e.to_string()))?
+        .wait_until_navigated()
+        .map_err(|e| ScrapeAnimeError::TabNavigateError(e.to_string()))?;
 
-    let tab: std::sync::Arc<headless_chrome::Tab> = match browser.new_tab() {
-        Ok(t) => t,
-        Err(e) => return Err(ScrapeAnimeError::BrowserTabError(e.to_string())),
-    };
-
-    match tab.enable_stealth_mode() {
-        Ok(_) => {}
-        Err(e) => return Err(ScrapeAnimeError::StealthModeError(e.to_string())),
-    };
-
-    match tab.set_user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36", Some("en-US,en;q=0.9,hi;q=0.8,es;q=0.7,lt;q=0.6"), Some("macOS")) {
-        Ok(_) => {},
-        Err(e) => return Err(ScrapeAnimeError::SetUserAgentError(e.to_string()))
-    };
-
-    match tab.navigate_to(&url) {
-        Ok(_) => {}
-        Err(e) => return Err(ScrapeAnimeError::BrowserTabError(e.to_string())),
-    };
-
-    sleep(Duration::from_millis(5000)).await;
+    // small buffer to make sure page loaded
+    sleep(Duration::from_millis(1000)).await;
 
     let content: String = match tab.get_content() {
         Ok(c) => c,
