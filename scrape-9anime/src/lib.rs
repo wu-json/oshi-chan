@@ -19,7 +19,7 @@ pub enum IsEpisodeOutError {
 /// otherwise it will render the episode page.
 pub async fn is_episode_out(id: &str, episode: u32) -> Result<bool, IsEpisodeOutError> {
     let url = format!("https://9anime.to/watch/{id}/ep-{episode}");
-    let tab = BrowserUtils::create_browser_tab()
+    let (_browser, tab) = BrowserUtils::create_browser_tab()
         .map_err(|e| IsEpisodeOutError::CreateBrowserTabError(e))?;
 
     tab.navigate_to(&url)
