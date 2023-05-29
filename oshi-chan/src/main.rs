@@ -4,6 +4,8 @@ mod handler;
 mod jobs;
 
 use environment::{Environment, EnvironmentTrait};
+use jobs::oshi_job::OshiJob;
+use jobs::check_for_new_releases::CheckForNewReleasesJob;
 use pg_client::{ConnectionManager, PgConnection, Pool};
 use serenity::{framework::standard::StandardFramework, prelude::*};
 use tokio_cron_scheduler::JobScheduler;
@@ -41,7 +43,7 @@ async fn main() {
     }
 
     let mut sched = JobScheduler::new().await.unwrap();
-    let jobs = [jobs::check_for_new_releases::make_job];
+    let jobs = [CheckForNewReleasesJob::make_job];
     for job in jobs {
         let http_clone = client.cache_and_http.http.clone();
         let pool_clone = pool.clone();
