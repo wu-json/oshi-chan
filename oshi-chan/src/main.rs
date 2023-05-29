@@ -4,9 +4,11 @@ mod handler;
 mod jobs;
 
 use environment::{Environment, EnvironmentTrait};
+use jobs::oshi_job::OshiJob;
+use jobs::check_for_new_releases::CheckForNewReleasesJob;
 use pg_client::{ConnectionManager, PgConnection, Pool};
 use serenity::{framework::standard::StandardFramework, prelude::*};
-use tokio_cron_scheduler::{Job, JobScheduler};
+use tokio_cron_scheduler::JobScheduler;
 
 pub struct PgPool;
 
@@ -16,61 +18,37 @@ impl serenity::prelude::TypeMapKey for PgPool {
 
 #[tokio::main]
 async fn main() {
-    let oshi_env: String = Environment::init();
+    let oshi_env = Environment::init();
     println!("Starting oshi-chan in {oshi_env} environment");
 
-    let framework: StandardFramework = StandardFramework::new();
-    let token: String = Environment::get_discord_token();
+    let framework = StandardFramework::new();
+    let token = Environment::get_discord_token();
+    let intents = GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
 
-    let intents: GatewayIntents =
-        GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
-
-    let pool: Pool<ConnectionManager<PgConnection>> =
-        pg_client::create_connection_pool(&Environment::get_database_url());
+    let pool = pg_client::create_connection_pool(&Environment::get_database_url());
     {
-        let connection: &mut pg_client::PooledConnection<ConnectionManager<PgConnection>> =
-            &mut pool.get().unwrap();
+        let connection = &mut pool.get().unwrap();
         pg_client::migrate(connection);
     };
 
-    let pool_copy = pool.clone();
-
-    let mut client: Client = Client::builder(&token, intents)
+    let discord_client_pool = pool.clone();
+    let mut client = Client::builder(&token, intents)
         .event_handler(handler::Handler)
         .framework(framework)
         .await
         .expect("Error creating serenity client");
     {
-        let mut data: tokio::sync::RwLockWriteGuard<TypeMap> = client.data.write().await;
-        data.insert::<PgPool>(pool);
+        let mut data = client.data.write().await;
+        data.insert::<PgPool>(discord_client_pool);
     }
 
     let mut sched = JobScheduler::new().await.unwrap();
-
-    let http = client.cache_and_http.http.clone();
-
-    sched
-        .add(
-            Job::new_async("0 1/15 * * * *", move |uuid, mut l| {
-                let http = http.clone();
-                let pool = pool_copy.clone();
-                Box::pin(async move {
-                    println!("New releases job started");
-                    jobs::check_for_new_releases::exec(&http, &pool).await;
-                    println!("New releases job completed");
-
-                    // Query the next execution time for this job
-                    let next_tick = l.next_tick_for_job(uuid).await;
-                    match next_tick {
-                        Ok(Some(ts)) => println!("Next time for new releases job is {:?}", ts),
-                        _ => println!("Could not get next tick for new releases job"),
-                    }
-                })
-            })
-            .unwrap(),
-        )
-        .await
-        .unwrap();
+    let jobs = [CheckForNewReleasesJob::make_job];
+    for job in jobs {
+        let http_clone = client.cache_and_http.http.clone();
+        let pool_clone = pool.clone();
+        sched.add(job(http_clone, pool_clone)).await.unwrap();
+    }
 
     #[cfg(feature = "signal")]
     sched.shutdown_on_ctrl_c();
