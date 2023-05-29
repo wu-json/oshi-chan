@@ -1,5 +1,6 @@
 mod browser_utils;
 
+use browser_utils::{BrowserUtils, TabUtils};
 use headless_chrome::Browser;
 use scraper::{Html, Selector};
 use thiserror::Error;
@@ -7,54 +8,27 @@ use tokio::time::{sleep, Duration};
 
 #[derive(Error, Debug)]
 pub enum IsEpisodeOutError {
-    #[error("Browser error.")]
-    BrowserError(String),
-    #[error("Browser tab error.")]
-    BrowserTabError(String),
-    #[error("Stealth mode error.")]
-    StealthModeError(String),
-    #[error("Set user agent error.")]
-    SetUserAgentError(String),
+    #[error("Create browser tab error.")]
+    CreateBrowserTabError(browser_utils::CreateBrowserTabError),
+    #[error("Tab navigate error.")]
+    TabNavigateError(String),
 }
 
 /// Checks whether an episode is out by navigating to the url of the episode.
 /// 9anime will redirect the client to episode 1 url if the episode is not out,
 /// otherwise it will render the episode page.
 pub async fn is_episode_out(id: &str, episode: u32) -> Result<bool, IsEpisodeOutError> {
-    let url: String = format!("https://9anime.to/watch/{id}/ep-{episode}");
+    let url = format!("https://9anime.to/watch/{id}/ep-{episode}");
+    let tab = BrowserUtils::create_browser_tab()
+        .map_err(|e| IsEpisodeOutError::CreateBrowserTabError(e))?;
 
-    let browser: Browser = match Browser::default() {
-        Ok(b) => b,
-        Err(e) => return Err(IsEpisodeOutError::BrowserError(e.to_string())),
-    };
-
-    let tab: std::sync::Arc<headless_chrome::Tab> = match browser.new_tab() {
-        Ok(t) => t,
-        Err(e) => return Err(IsEpisodeOutError::BrowserTabError(e.to_string())),
-    };
-
-    match tab.enable_stealth_mode() {
-        Ok(_) => {}
-        Err(e) => return Err(IsEpisodeOutError::StealthModeError(e.to_string())),
-    };
-
-    match tab.set_user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36", Some("en-US,en;q=0.9,hi;q=0.8,es;q=0.7,lt;q=0.6"), Some("macOS")) {
-        Ok(_) => {},
-        Err(e) => return Err(IsEpisodeOutError::SetUserAgentError(e.to_string()))
-    };
-
-    match tab.navigate_to(&url) {
-        Ok(_) => {}
-        Err(e) => return Err(IsEpisodeOutError::BrowserTabError(e.to_string())),
-    };
+    tab.navigate_to(&url)
+        .map_err(|e| IsEpisodeOutError::TabNavigateError(e.to_string()))?;
 
     // wait longer here since we aren't in a huge rush and want to make sure
     // the result is accurate
     sleep(Duration::from_millis(10000)).await;
-
-    let new_url: String = tab.get_url();
-
-    Ok(new_url == url)
+    Ok(tab.get_url() == url)
 }
 
 #[derive(Debug)]
@@ -187,9 +161,12 @@ pub async fn scrape_anime(id: &str) -> Result<Anime, ScrapeAnimeError> {
             total_episodes_count = match text[1].parse::<u32>() {
                 Ok(c) => c,
                 Err(_) => {
-                    println!("Error parsing total episode count. Falling back on default ({}).", total_episodes_count);
+                    println!(
+                        "Error parsing total episode count. Falling back on default ({}).",
+                        total_episodes_count
+                    );
                     total_episodes_count
-                },
+                }
             };
             break;
         }
