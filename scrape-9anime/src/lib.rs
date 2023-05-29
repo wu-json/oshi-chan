@@ -4,7 +4,6 @@ use thiserror::Error;
 use tokio::time::{sleep, Duration};
 
 #[derive(Error, Debug)]
-
 pub enum IsEpisodeOutError {
     #[error("Browser error.")]
     BrowserError(String),
