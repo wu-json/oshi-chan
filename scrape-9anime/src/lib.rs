@@ -77,16 +77,13 @@ pub async fn scrape_anime(id: &str) -> Result<Anime, ScrapeAnimeError> {
 
     let name = Selector::parse("div.info h1.title")
         .map_err(|e| ScrapeAnimeError::SelectorCreationError(e.to_string()))?;
-    let name: scraper::ElementRef = match document.select(&name).next() {
-        Some(s) => s,
-        None => {
-            return Err(ScrapeAnimeError::SelectorNotFoundError(String::from(
-                "Name not found.",
-            )))
-        }
-    };
-    let name: Vec<&str> = name.text().collect::<Vec<_>>();
-    let name: &str = name[0];
+    let name = document
+        .select(&name)
+        .next()
+        .ok_or(ScrapeAnimeError::SelectorNotFoundError(String::from(
+            "Name not found.",
+        )))?;
+    let name = name.text().collect::<Vec<_>>()[0];
 
     let desc = Selector::parse("div.info div.shorting div.content")
         .map_err(|e| ScrapeAnimeError::SelectorCreationError(e.to_string()))?;
