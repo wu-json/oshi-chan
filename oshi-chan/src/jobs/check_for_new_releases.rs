@@ -4,6 +4,7 @@ use scrape_9anime::is_episode_out;
 use serenity::builder::CreateMessage;
 use serenity::http::Http;
 use std::sync::Arc;
+use tokio_cron_scheduler::Job;
 
 pub async fn exec(http: &Arc<Http>, pool: &Pool<ConnectionManager<PgConnection>>) {
     let connection: &mut PooledConnection<ConnectionManager<PgConnection>> =
@@ -80,4 +81,24 @@ pub async fn exec(http: &Arc<Http>, pool: &Pool<ConnectionManager<PgConnection>>
             println!("check_for_new_releases: error sending message: {:?}", why);
         }
     }
+}
+
+pub fn make_job(http: Arc<Http>, pool: Pool<ConnectionManager<PgConnection>>) -> Job {
+    Job::new_async("0 1/15 * * * *", move |uuid, mut l| {
+        let http = http.clone();
+        let pool = pool.clone();
+        Box::pin(async move {
+            println!("New releases job started");
+            exec(&http, &pool).await;
+            println!("New releases job completed");
+
+            // Query the next execution time for this job
+            let next_tick = l.next_tick_for_job(uuid).await;
+            match next_tick {
+                Ok(Some(ts)) => println!("Next time for new releases job is {:?}", ts),
+                _ => println!("Could not get next tick for new releases job"),
+            }
+        })
+    })
+    .unwrap()
 }

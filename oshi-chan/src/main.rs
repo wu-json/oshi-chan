@@ -6,7 +6,7 @@ mod jobs;
 use environment::{Environment, EnvironmentTrait};
 use pg_client::{ConnectionManager, PgConnection, Pool};
 use serenity::{framework::standard::StandardFramework, prelude::*};
-use tokio_cron_scheduler::{Job, JobScheduler};
+use tokio_cron_scheduler::JobScheduler;
 
 pub struct PgPool;
 
@@ -41,30 +41,12 @@ async fn main() {
     }
 
     let mut sched = JobScheduler::new().await.unwrap();
-    let http = client.cache_and_http.http.clone();
-
-    sched
-        .add(
-            Job::new_async("0 1/15 * * * *", move |uuid, mut l| {
-                let http = http.clone();
-                let pool = pool.clone();
-                Box::pin(async move {
-                    println!("New releases job started");
-                    jobs::check_for_new_releases::exec(&http, &pool).await;
-                    println!("New releases job completed");
-
-                    // Query the next execution time for this job
-                    let next_tick = l.next_tick_for_job(uuid).await;
-                    match next_tick {
-                        Ok(Some(ts)) => println!("Next time for new releases job is {:?}", ts),
-                        _ => println!("Could not get next tick for new releases job"),
-                    }
-                })
-            })
-            .unwrap(),
-        )
-        .await
-        .unwrap();
+    let job_factories = [jobs::check_for_new_releases::make_job];
+    for make_job in job_factories {
+        let http_clone = client.cache_and_http.http.clone();
+        let pool_clone = pool.clone();
+        sched.add(make_job(http_clone, pool_clone)).await.unwrap();
+    }
 
     #[cfg(feature = "signal")]
     sched.shutdown_on_ctrl_c();
