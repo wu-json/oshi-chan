@@ -1,7 +1,6 @@
 mod browser_utils;
 
 use browser_utils::{BrowserUtils, TabUtils};
-use headless_chrome::Browser;
 use scraper::{Html, Selector};
 use thiserror::Error;
 use tokio::time::{sleep, Duration};
@@ -70,17 +69,14 @@ pub async fn scrape_anime(id: &str) -> Result<Anime, ScrapeAnimeError> {
     // small buffer to make sure page loaded
     sleep(Duration::from_millis(1000)).await;
 
-    let content: String = match tab.get_content() {
-        Ok(c) => c,
-        Err(e) => return Err(ScrapeAnimeError::ContentRetrievalError(e.to_string())),
-    };
+    let content = tab
+        .get_content()
+        .map_err(|e| ScrapeAnimeError::ContentRetrievalError(e.to_string()))?;
 
-    let document: Html = Html::parse_document(&content);
+    let document = Html::parse_document(&content);
 
-    let name: Selector = match Selector::parse("div.info h1.title") {
-        Ok(s) => s,
-        Err(e) => return Err(ScrapeAnimeError::SelectorCreationError(e.to_string())),
-    };
+    let name = Selector::parse("div.info h1.title")
+        .map_err(|e| ScrapeAnimeError::SelectorCreationError(e.to_string()))?;
     let name: scraper::ElementRef = match document.select(&name).next() {
         Some(s) => s,
         None => {
@@ -92,10 +88,8 @@ pub async fn scrape_anime(id: &str) -> Result<Anime, ScrapeAnimeError> {
     let name: Vec<&str> = name.text().collect::<Vec<_>>();
     let name: &str = name[0];
 
-    let desc: Selector = match Selector::parse("div.info div.shorting div.content") {
-        Ok(s) => s,
-        Err(e) => return Err(ScrapeAnimeError::SelectorCreationError(e.to_string())),
-    };
+    let desc = Selector::parse("div.info div.shorting div.content")
+        .map_err(|e| ScrapeAnimeError::SelectorCreationError(e.to_string()))?;
     let desc: scraper::ElementRef = match document.select(&desc).next() {
         Some(s) => s,
         None => {
@@ -107,10 +101,8 @@ pub async fn scrape_anime(id: &str) -> Result<Anime, ScrapeAnimeError> {
     let desc: Vec<&str> = desc.text().collect::<Vec<_>>();
     let desc: &str = desc[0];
 
-    let poster_img: Selector = match Selector::parse("div.binfo div.poster span img") {
-        Ok(s) => s,
-        Err(e) => return Err(ScrapeAnimeError::SelectorCreationError(e.to_string())),
-    };
+    let poster_img = Selector::parse("div.binfo div.poster span img")
+        .map_err(|e| ScrapeAnimeError::SelectorCreationError(e.to_string()))?;
     let poster_img: scraper::ElementRef = match document.select(&poster_img).next() {
         Some(s) => s,
         None => {
@@ -128,10 +120,8 @@ pub async fn scrape_anime(id: &str) -> Result<Anime, ScrapeAnimeError> {
         }
     };
 
-    let total_episodes: Selector = match Selector::parse("div.info div.bmeta div.meta div") {
-        Ok(s) => s,
-        Err(e) => return Err(ScrapeAnimeError::SelectorCreationError(e.to_string())),
-    };
+    let total_episodes = Selector::parse("div.info div.bmeta div.meta div")
+        .map_err(|e| ScrapeAnimeError::SelectorCreationError(e.to_string()))?;
     let total_episodes: Vec<scraper::ElementRef> =
         document.select(&&total_episodes).collect::<Vec<_>>();
     let mut total_episodes_count: u32 = 12;
