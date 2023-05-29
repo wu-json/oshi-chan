@@ -23,11 +23,13 @@ pub async fn is_episode_out(id: &str, episode: u32) -> Result<bool, IsEpisodeOut
         .map_err(|e| IsEpisodeOutError::CreateBrowserTabError(e))?;
 
     tab.navigate_to(&url)
+        .map_err(|e| IsEpisodeOutError::TabNavigateError(e.to_string()))?
+        .wait_until_navigated()
         .map_err(|e| IsEpisodeOutError::TabNavigateError(e.to_string()))?;
 
     // wait longer here since we aren't in a huge rush and want to make sure
     // the result is accurate
-    sleep(Duration::from_millis(10000)).await;
+    // sleep(Duration::from_millis(10000)).await;
     Ok(tab.get_url() == url)
 }
 
