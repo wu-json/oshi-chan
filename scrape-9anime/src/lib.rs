@@ -20,11 +20,14 @@ pub async fn is_episode_out(id: &str, episode: u32) -> Result<bool, IsEpisodeOut
     let (_browser, tab) = BrowserUtils::create_browser_tab()
         .map_err(|e| IsEpisodeOutError::CreateBrowserTabError(e))?;
 
+    // element we use to determine whether page has loaded or not
+    let load_selector = format!("#watch-main[data-url|=\"https://9anime.to/watch/{id}\"]");
+
     tab.navigate_to(&url)
         .map_err(|e| IsEpisodeOutError::TabNavigateError(e.to_string()))?
         .wait_until_navigated()
         .map_err(|e| IsEpisodeOutError::TabNavigateError(e.to_string()))?
-        .wait_for_element("#watch-main")
+        .wait_for_element(&load_selector)
         .map_err(|e| IsEpisodeOutError::TabNavigateError(e.to_string()))?;
 
     // small buffer to be extra sure redirect occurred if episode is not out
@@ -62,9 +65,14 @@ pub async fn scrape_anime(id: &str) -> Result<Anime, ScrapeAnimeError> {
     let (_browser, tab) = BrowserUtils::create_browser_tab()
         .map_err(|e| ScrapeAnimeError::CreateBrowserTabError(e))?;
 
+    // element we use to determine whether page has loaded or not
+    let load_selector = format!("#watch-main[data-url|=\"https://9anime.to/watch/{id}\"]");
+
     tab.navigate_to(&url)
         .map_err(|e| ScrapeAnimeError::TabNavigateError(e.to_string()))?
         .wait_until_navigated()
+        .map_err(|e| ScrapeAnimeError::TabNavigateError(e.to_string()))?
+        .wait_for_element(&load_selector)
         .map_err(|e| ScrapeAnimeError::TabNavigateError(e.to_string()))?;
 
     // small buffer to make sure page loaded
