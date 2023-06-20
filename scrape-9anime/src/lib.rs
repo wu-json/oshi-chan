@@ -24,7 +24,7 @@ pub async fn is_episode_out(id: &str, episode: u32) -> Result<bool, IsEpisodeOut
         .map_err(|e| IsEpisodeOutError::TabNavigateError(e.to_string()))?
         .wait_until_navigated()
         .map_err(|e| IsEpisodeOutError::TabNavigateError(e.to_string()))?
-        .wait_for_element("#w-servers div.tip")
+        .wait_for_element("#watch-main")
         .map_err(|e| IsEpisodeOutError::TabNavigateError(e.to_string()))?;
 
     // small buffer to be extra sure redirect occurred if episode is not out
