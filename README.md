@@ -53,4 +53,14 @@ docker build --platform linux/amd64 . -f oshi-chan/Dockerfile
 
 ## Usage
 
-You can get a list of available commands by typing `!oshi` in the Discord channel. Oshi should respond to any channel except for `#oshi-development`, which is reserved for local testing.
+You can get a list of available commands by typing `!oshi` in the Discord channel.
+
+![Screenshot 2023-07-09 at 4 07 10 PM](https://github.com/wu-json/oshi-chan/assets/45532884/e50473c4-e084-4521-a31a-a136c4c620fc)
+
+Here's what adding a show to the watchlist looks like.
+
+![Screenshot 2023-07-09 at 4 08 18 PM](https://github.com/wu-json/oshi-chan/assets/45532884/07c026b0-4c38-4fb8-9961-ec32da425420)
+
+Here's what a notification from Oshi looks like.
+
+![Screenshot 2023-07-09 at 4 09 05 PM](https://github.com/wu-json/oshi-chan/assets/45532884/053dae84-299a-4ce8-b286-70d2d1d2b689)
