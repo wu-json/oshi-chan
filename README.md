@@ -1,5 +1,8 @@
-## Oshi-Chan
-Oshi-chan is a bot for the Tengoku Discord Server. This is a work in progress and I am still ass at Rust so we will see how this goes.
+## Oshi-chan
+
+Oshi-chan is a Discord Bot that allows you to subscribe to anime releases (via 9anime.to) and get notified when they come out. I built this since my friends and I coordinate watch anime parties in Discord, and I thought it would be useful to have live notifications of new episodes coming out without having to constantly check the website manually.
+
+Oshi is built entirely with Rust and lives on a single app (excluding the Postgres instance) deployed to [Fly.io](https://fly.io/dashboard). It scrapes 9anime for the shows in the watchlist every hour, and sends a message to the Discord channel when a new release is found.
 
 ## Development
 
@@ -46,8 +49,3 @@ docker build --platform linux/amd64 . -f oshi-chan/Dockerfile
 ## Usage
 
 You can get a list of available commands by typing `!oshi` in the Discord channel. Oshi should respond to any channel except for `#oshi-development`, which is reserved for local testing.
-
-## Feature Backlog
-
-- Birthday reminders
-- Music player
