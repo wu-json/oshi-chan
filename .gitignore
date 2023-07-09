@@ -19,3 +19,6 @@ Cargo.lock
 /target
 .env
 .env.*
+
+# Vscode config
+.vscode
