@@ -19,6 +19,14 @@ This is the C application interface with PostgreSQL, and is necessary for runnin
 brew install libpq
 ```
 
+
+### Proxy Fly Postgres
+As an alternative to running a local Postgres for Oshi to connect to, you can also proxy the production Fly Postgres to your local machine.
+
+```bash
+fly proxy 5432 -a oshi-chan-pg
+```
+
 ### Build and Start the Program
 ```bash
 # proxy flyio postgres to local
