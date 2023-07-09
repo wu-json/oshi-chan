@@ -20,7 +20,7 @@ pub async fn exec(ctx: &Context, msg: &Message) {
 
     let content: String = MessageBuilder::new()
         .push_line("Here are the shows currently on your watchlist!")
-        .push_codeblock(list, Some("bash"))
+        .push_codeblock(list, Some("markdown"))
         .build();
 
     if let Err(why) = msg.channel_id.say(&ctx.http, &content).await {
