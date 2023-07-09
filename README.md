@@ -11,6 +11,14 @@ You will need to get a `.env.development` file from Jason to get started, and th
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
+### Install libpq
+This is the C application interface with PostgreSQL, and is necessary for running Oshi locally.
+
+```bash
+# note, you may need to update ~/.zprofile or ~/.zshrc after doing this
+brew install libpq
+```
+
 ### Build and Start the Program
 ```bash
 # proxy flyio postgres to local
