@@ -16,6 +16,7 @@ pub fn create_connection_pool(database_url: &str) -> Pool<ConnectionManager<PgCo
         ConnectionManager::<PgConnection>::new(database_url);
     Pool::builder()
         .test_on_check_out(true)
+        .max_size(50)
         .build(manager)
         .expect("Failed to build Postgres connection pool")
 }
