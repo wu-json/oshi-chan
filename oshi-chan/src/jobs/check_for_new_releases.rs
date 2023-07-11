@@ -43,7 +43,7 @@ impl OshiJob for CheckForNewReleasesJob {
 
             println!(
                 "{}: episode {} {}",
-                anime.nine_anime_id,
+                &anime.nine_anime_id,
                 new_episode,
                 if new_episode_out {
                     "is out!"
@@ -77,7 +77,7 @@ impl OshiJob for CheckForNewReleasesJob {
                     ))
                     .description(format!(
                         "Check it out at https://9anime.to/watch/{}/ep-{}",
-                        anime.nine_anime_id,
+                        &anime.nine_anime_id,
                         anime.latest_episode + 1
                     ))
             });
