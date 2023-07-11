@@ -56,7 +56,7 @@ impl OshiJob for CheckForNewReleasesJob {
                 pg_client::update_watchlist_entry(
                     connection,
                     &anime.nine_anime_id,
-                    new_episode as i32,
+                    &(new_episode as i32),
                 );
                 new_releases.push(anime);
             }
