@@ -52,14 +52,14 @@ impl OshiJob for CheckForNewReleasesJob {
                 }
             );
 
-            // if new_episode_out {
-            //     pg_client::update_watchlist_entry(
-            //         connection,
-            //         &anime.nine_anime_id,
-            //         new_episode as i32,
-            //     );
-            //     new_releases.push(anime);
-            // }
+            if new_episode_out {
+                // pg_client::update_watchlist_entry(
+                //     connection,
+                //     &anime.nine_anime_id,
+                //     new_episode as i32,
+                // );
+                new_releases.push(anime);
+            }
         }
 
         println!("Found {} new releases", new_releases.len());
