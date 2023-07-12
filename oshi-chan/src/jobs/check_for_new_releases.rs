@@ -10,13 +10,15 @@ use tokio_cron_scheduler::Job;
 
 pub struct CheckForNewReleasesJob {}
 
+fn get_watchlist(pool: &Pool<ConnectionManager<PgConnection>>) -> Vec<models::WatchList> {
+    let connection = &mut pool.get().unwrap();
+    pg_client::get_watchlist(connection)
+}
+
 #[async_trait]
 impl OshiJob for CheckForNewReleasesJob {
     async fn exec(http: &Arc<Http>, pool: &Pool<ConnectionManager<PgConnection>>) -> () {
-        let connection: &mut PooledConnection<ConnectionManager<PgConnection>> =
-            &mut pool.get().unwrap();
-
-        let results: Vec<models::WatchList> = pg_client::get_watchlist(connection);
+        let results: Vec<models::WatchList> = get_watchlist(pool);
         let mut new_releases: Vec<models::WatchList> = Vec::new();
 
         println!("Checking for new releases for {} shows", results.len());
@@ -53,11 +55,14 @@ impl OshiJob for CheckForNewReleasesJob {
             );
 
             if new_episode_out {
-                pg_client::update_watchlist_entry(
-                    connection,
-                    &anime.nine_anime_id,
-                    new_episode as i32,
-                );
+                {
+                    let connection = &mut pool.get().unwrap();
+                    pg_client::update_watchlist_entry(
+                        connection,
+                        &anime.nine_anime_id,
+                        new_episode as i32,
+                    );
+                }
                 new_releases.push(anime);
             }
         }
