@@ -31,6 +31,9 @@ impl EventHandler for Handler {
         }
 
         match command_parts[1] {
+            "poll" => {
+                commands::poll::exec(&ctx, &msg).await;
+            }
             "version" => {
                 commands::version::exec(&ctx, &msg).await;
             }
@@ -64,12 +67,6 @@ impl EventHandler for Handler {
                 }
             }
             _ => (),
-        }
-
-        if msg.content == "hello oshi" {
-            if let Err(why) = msg.channel_id.say(&ctx.http, "hello").await {
-                println!("Error sending message: {:?}", why);
-            }
         }
     }
 
