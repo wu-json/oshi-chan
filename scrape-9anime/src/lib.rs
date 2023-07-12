@@ -23,6 +23,7 @@ pub async fn is_episode_out(id: &str, episode: u32) -> Result<bool, IsEpisodeOut
     // element we use to determine whether page has loaded or not
     let load_selector = format!("#watch-main[data-url|=\"https://9anime.to/watch/{id}\"]");
 
+    // first navigation to check whether episode is out or not
     tab.navigate_to(&url)
         .map_err(|e| IsEpisodeOutError::TabNavigateError(e.to_string()))?
         .wait_until_navigated()
@@ -30,10 +31,33 @@ pub async fn is_episode_out(id: &str, episode: u32) -> Result<bool, IsEpisodeOut
         .wait_for_element(&load_selector)
         .map_err(|e| IsEpisodeOutError::TabNavigateError(e.to_string()))?;
 
-    // buffer to be extra sure redirect occurred if episode is not out
-    sleep(Duration::from_millis(5000)).await;
+    // buffer to ensure redirect has time to update url
+    sleep(Duration::from_millis(500)).await;
 
-    Ok(tab.get_url() == url)
+    let is_out = tab.get_url() == url;
+
+    // wait 2 seconds before trying confirmation to add buffer
+    sleep(Duration::from_millis(2000)).await;
+
+    // second navigation so we can confirm whether episode is out or not
+    tab.navigate_to(&url)
+        .map_err(|e| IsEpisodeOutError::TabNavigateError(e.to_string()))?
+        .wait_until_navigated()
+        .map_err(|e| IsEpisodeOutError::TabNavigateError(e.to_string()))?
+        .wait_for_element(&load_selector)
+        .map_err(|e| IsEpisodeOutError::TabNavigateError(e.to_string()))?;
+
+    // buffer to ensure redirect has time to update url
+    sleep(Duration::from_millis(500)).await;
+
+    let is_out_confirmed = tab.get_url() == url;
+
+    // if the two attempts do not agree we assume the episode is not out
+    if is_out != is_out_confirmed {
+        return Ok(false);
+    }
+
+    Ok(is_out)
 }
 
 #[derive(Debug)]
