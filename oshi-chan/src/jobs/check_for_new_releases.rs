@@ -1,6 +1,6 @@
 use crate::environment::{Environment, EnvironmentTrait};
 use crate::jobs::oshi_job::OshiJob;
-use pg_client::{models, ConnectionManager, PgConnection, Pool, PooledConnection};
+use pg_client::{models, ConnectionManager, PgConnection, Pool};
 use scrape_9anime::is_episode_out;
 use serenity::async_trait;
 use serenity::builder::CreateMessage;
