@@ -6,7 +6,7 @@ const COMMAND_LIST: &str = "
 !oshi watchlist list: list anime in the watchlist
 !oshi watchlist add <9anime-id> <latest-episode>: add an anime to the watchlist
 !oshi watchlist delete <9anime-id>: remove an anime from the watchlist
-!oshi poll: force oshi to search for new shows
+!oshi poll: force oshi to poll 9anime for new releases
 ";
 
 pub async fn exec(ctx: &Context, msg: &Message) {
