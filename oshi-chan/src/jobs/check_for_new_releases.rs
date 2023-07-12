@@ -95,7 +95,7 @@ impl OshiJob for CheckForNewReleasesJob {
     }
 
     fn make_job(http: Arc<Http>, pool: Pool<ConnectionManager<PgConnection>>) -> Job {
-        Job::new_async("0 1/5 * * * *", move |uuid, mut l| {
+        Job::new_async("0 1/15 * * * *", move |uuid, mut l| {
             let http = http.clone();
             let pool = pool.clone();
             Box::pin(async move {
