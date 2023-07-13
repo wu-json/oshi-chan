@@ -3,7 +3,6 @@ use browser_utils::{BrowserUtils, TabUtils};
 use scraper::{Html, Selector};
 use thiserror::Error;
 use tokio::time::{sleep, Duration};
-use headless_chrome::Browser;
 
 #[derive(Error, Debug)]
 pub enum IsEpisodeOutError {
@@ -16,13 +15,9 @@ pub enum IsEpisodeOutError {
 /// Checks whether an episode is out by navigating to the url of the episode.
 /// 9anime will redirect the client to episode 1 url if the episode is not out,
 /// otherwise it will render the episode page.
-pub async fn is_episode_out(
-    id: &str,
-    episode: u32,
-    maybe_browser: Option<Browser>,
-) -> Result<bool, IsEpisodeOutError> {
+pub async fn is_episode_out(id: &str, episode: u32) -> Result<bool, IsEpisodeOutError> {
     let url = format!("https://9anime.to/watch/{id}/ep-{episode}");
-    let (_browser, tab) = BrowserUtils::create_browser_tab(maybe_browser)
+    let (_browser, tab) = BrowserUtils::create_browser_tab(None)
         .map_err(|e| IsEpisodeOutError::CreateBrowserTabError(e))?;
 
     // element we use to determine whether page has loaded or not
