@@ -17,7 +17,7 @@ pub enum IsEpisodeOutError {
 /// otherwise it will render the episode page.
 pub async fn is_episode_out(id: &str, episode: u32) -> Result<bool, IsEpisodeOutError> {
     let url = format!("https://9anime.to/watch/{id}/ep-{episode}");
-    let (_browser, tab) = BrowserUtils::create_browser_tab()
+    let (_browser, tab) = BrowserUtils::create_browser_tab(None)
         .map_err(|e| IsEpisodeOutError::CreateBrowserTabError(e))?;
 
     // element we use to determine whether page has loaded or not
@@ -94,7 +94,7 @@ pub enum ScrapeAnimeError {
 
 pub async fn scrape_anime(id: &str) -> Result<Anime, ScrapeAnimeError> {
     let url = format!("https://9anime.to/watch/{id}");
-    let (_browser, tab) = BrowserUtils::create_browser_tab()
+    let (_browser, tab) = BrowserUtils::create_browser_tab(None)
         .map_err(|e| ScrapeAnimeError::CreateBrowserTabError(e))?;
 
     // element we use to determine whether page has loaded or not

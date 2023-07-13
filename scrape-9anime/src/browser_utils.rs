@@ -4,7 +4,9 @@ use thiserror::Error;
 
 pub struct BrowserUtils {}
 pub trait TabUtils {
-    fn create_browser_tab() -> Result<(Browser, Arc<headless_chrome::Tab>), CreateBrowserTabError>;
+    fn create_browser_tab(
+        maybe_browser: Option<Browser>,
+    ) -> Result<(Browser, Arc<headless_chrome::Tab>), CreateBrowserTabError>;
 }
 
 #[derive(Error, Debug)]
@@ -24,9 +26,14 @@ const ACCEPT_LANGUAGE: &str = "en-US,en;q=0.9,hi;q=0.8,es;q=0.7,lt;q=0.6";
 const PLATFORM: &str = "macOS";
 
 impl TabUtils for BrowserUtils {
-    fn create_browser_tab() -> Result<(Browser, Arc<headless_chrome::Tab>), CreateBrowserTabError> {
-        let browser =
-            Browser::default().map_err(|e| CreateBrowserTabError::CreateError(e.to_string()))?;
+    fn create_browser_tab(
+        maybe_browser: Option<Browser>,
+    ) -> Result<(Browser, Arc<headless_chrome::Tab>), CreateBrowserTabError> {
+        let browser = if let Some(existing_browser) = maybe_browser {
+            existing_browser
+        } else {
+            Browser::default().map_err(|e| CreateBrowserTabError::CreateError(e.to_string()))?
+        };
 
         let tab = browser
             .new_tab()
