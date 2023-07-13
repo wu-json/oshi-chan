@@ -50,6 +50,14 @@ pub async fn is_episode_out(id: &str, episode: u32) -> Result<bool, IsEpisodeOut
     // buffer to ensure redirect has time to update url
     sleep(Duration::from_millis(500)).await;
 
+    // clean up the tab
+    match tab.close(true) {
+        Ok(_) => (),
+        Err(err) => {
+            println!("Error trying to close tab: {}", err.to_string());
+        }
+    }
+
     let is_out_confirmed = tab.get_url() == url;
 
     // if the two attempts do not agree we assume the episode is not out
@@ -105,6 +113,14 @@ pub async fn scrape_anime(id: &str) -> Result<Anime, ScrapeAnimeError> {
     let content = tab
         .get_content()
         .map_err(|e| ScrapeAnimeError::ContentRetrievalError(e.to_string()))?;
+
+    // clean up the tab
+    match tab.close(true) {
+        Ok(_) => (),
+        Err(err) => {
+            println!("Error trying to close tab: {}", err.to_string());
+        }
+    }
 
     let document = Html::parse_document(&content);
 
