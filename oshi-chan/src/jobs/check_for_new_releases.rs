@@ -31,7 +31,7 @@ impl OshiJob for CheckForNewReleasesJob {
 
             let new_episode: u32 = (anime.latest_episode + 1) as u32;
             let new_episode_out: bool =
-                match is_episode_out(&anime.nine_anime_id, new_episode).await {
+                match is_episode_out(&anime.nine_anime_id, new_episode, None).await {
                     Ok(v) => v,
                     Err(err) => {
                         println!(
