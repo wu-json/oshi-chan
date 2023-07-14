@@ -15,6 +15,51 @@ fn get_watchlist(pool: &Pool<ConnectionManager<PgConnection>>) -> Vec<models::Wa
     pg_client::get_watchlist(connection)
 }
 
+// Polls whether an anime is out and saves the result in Postgres.
+// Returns true if new release was found and false otherwise.
+async fn poll_and_save(
+    pool: &Pool<ConnectionManager<PgConnection>>,
+    anime: &models::WatchList,
+) -> bool {
+    // series is finished so we know no release is out
+    if anime.latest_episode + 1 > anime.total_episodes {
+        return false;
+    }
+
+    let new_episode: u32 = (anime.latest_episode + 1) as u32;
+    let new_episode_out: bool = match is_episode_out(&anime.nine_anime_id, new_episode).await {
+        Ok(v) => v,
+        Err(err) => {
+            println!(
+                "Error occurred while checking for new releases for {}: {}",
+                &anime.nine_anime_id,
+                err.to_string()
+            );
+            false
+        }
+    };
+
+    println!(
+        "{}: episode {} {}",
+        anime.nine_anime_id,
+        new_episode,
+        if new_episode_out {
+            "is out!"
+        } else {
+            "is not out"
+        }
+    );
+
+    if new_episode_out {
+        {
+            let connection = &mut pool.get().unwrap();
+            pg_client::update_watchlist_entry(connection, &anime.nine_anime_id, new_episode as i32);
+        }
+    }
+
+    new_episode_out
+}
+
 #[async_trait]
 impl OshiJob for CheckForNewReleasesJob {
     async fn exec(http: &Arc<Http>, pool: &Pool<ConnectionManager<PgConnection>>) -> () {
@@ -24,46 +69,8 @@ impl OshiJob for CheckForNewReleasesJob {
         println!("Checking for new releases for {} shows", results.len());
 
         for anime in results {
-            // series is finished so we exit
-            if anime.latest_episode + 1 > anime.total_episodes {
-                continue;
-            }
-
-            let new_episode: u32 = (anime.latest_episode + 1) as u32;
-            let new_episode_out: bool =
-                match is_episode_out(&anime.nine_anime_id, new_episode).await {
-                    Ok(v) => v,
-                    Err(err) => {
-                        println!(
-                            "Error occurred while checking for new releases for {}: {}",
-                            &anime.nine_anime_id,
-                            err.to_string()
-                        );
-                        false
-                    }
-                };
-
-            println!(
-                "{}: episode {} {}",
-                anime.nine_anime_id,
-                new_episode,
-                if new_episode_out {
-                    "is out!"
-                } else {
-                    "is not out"
-                }
-            );
-
-            if new_episode_out {
-                {
-                    let connection = &mut pool.get().unwrap();
-                    pg_client::update_watchlist_entry(
-                        connection,
-                        &anime.nine_anime_id,
-                        new_episode as i32,
-                    );
-                }
-                new_releases.push(anime);
+            if poll_and_save(pool, &anime).await {
+                new_releases.push(anime)
             }
         }
 
