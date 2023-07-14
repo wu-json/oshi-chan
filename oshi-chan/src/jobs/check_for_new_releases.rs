@@ -18,12 +18,12 @@ fn get_watchlist(pool: &Pool<ConnectionManager<PgConnection>>) -> Vec<models::Wa
 // Polls whether an anime is out and saves the result in Postgres.
 // Returns true if new release was found and false otherwise.
 async fn poll_and_save(
-    pool: &Pool<ConnectionManager<PgConnection>>,
-    anime: &models::WatchList,
-) -> bool {
+    pool: Pool<ConnectionManager<PgConnection>>,
+    anime: models::WatchList,
+) -> (bool, models::WatchList) {
     // series is finished so we know no release is out
     if anime.latest_episode + 1 > anime.total_episodes {
-        return false;
+        return (false, anime);
     }
 
     let new_episode: u32 = (anime.latest_episode + 1) as u32;
@@ -57,20 +57,27 @@ async fn poll_and_save(
         }
     }
 
-    new_episode_out
+    (new_episode_out, anime)
 }
 
 #[async_trait]
 impl OshiJob for CheckForNewReleasesJob {
     async fn exec(http: &Arc<Http>, pool: &Pool<ConnectionManager<PgConnection>>) -> () {
         let watchlist: Vec<models::WatchList> = get_watchlist(pool);
-        let mut new_releases: Vec<models::WatchList> = Vec::new();
 
         println!("Checking for new releases for {} shows", watchlist.len());
 
+        let mut tasks = Vec::with_capacity(watchlist.len());
         for anime in watchlist {
-            if poll_and_save(pool, &anime).await {
-                new_releases.push(anime)
+            let pool_copy = pool.clone();
+            tasks.push(tokio::spawn(poll_and_save(pool_copy, anime)));
+        }
+
+        let mut new_releases = Vec::with_capacity(tasks.len());
+        for task in tasks {
+            let r = task.await.unwrap();
+            if r.0 {
+                new_releases.push(r.1);
             }
         }
 
