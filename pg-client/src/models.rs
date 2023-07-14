@@ -2,6 +2,7 @@ use crate::schema::watchlist;
 use diesel::prelude::*;
 use diesel::data_types::PgTimestamp;
 
+#[derive(Clone)]
 #[derive(Queryable)]
 pub struct WatchList {
     pub id: i32,
