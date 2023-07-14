@@ -63,12 +63,12 @@ async fn poll_and_save(
 #[async_trait]
 impl OshiJob for CheckForNewReleasesJob {
     async fn exec(http: &Arc<Http>, pool: &Pool<ConnectionManager<PgConnection>>) -> () {
-        let results: Vec<models::WatchList> = get_watchlist(pool);
+        let watchlist: Vec<models::WatchList> = get_watchlist(pool);
         let mut new_releases: Vec<models::WatchList> = Vec::new();
 
-        println!("Checking for new releases for {} shows", results.len());
+        println!("Checking for new releases for {} shows", watchlist.len());
 
-        for anime in results {
+        for anime in watchlist {
             if poll_and_save(pool, &anime).await {
                 new_releases.push(anime)
             }
