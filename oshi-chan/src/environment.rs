@@ -11,6 +11,7 @@ pub trait EnvironmentTrait {
     fn get_oshi_dev_channel_id() -> ChannelId;
     fn get_oshi_general_channel_id() -> ChannelId;
     fn get_oshi_version() -> &'static str;
+    fn get_release_polling_parallelism_limit() -> usize;
 }
 
 pub struct Environment;
@@ -51,5 +52,12 @@ impl EnvironmentTrait for Environment {
 
     fn get_oshi_version() -> &'static str {
         env!("CARGO_PKG_VERSION")
+    }
+
+    fn get_release_polling_parallelism_limit() -> usize {
+        match env::var("RELEASE_POLLING_PARALLELISM_LIMIT") {
+            Ok(v) => v.parse::<usize>().unwrap(),
+            Err(_) => 2,
+        }
     }
 }

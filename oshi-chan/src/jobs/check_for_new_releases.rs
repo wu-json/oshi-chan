@@ -69,7 +69,9 @@ impl OshiJob for CheckForNewReleasesJob {
         println!("Checking for new releases for {} shows", watchlist.len());
 
         let mut tasks = Vec::with_capacity(watchlist.len());
-        let sem = Arc::new(Semaphore::new(2));
+        let sem = Arc::new(Semaphore::new(
+            Environment::get_release_polling_parallelism_limit(),
+        ));
 
         for anime in watchlist {
             let permit = Arc::clone(&sem).acquire_owned().await;
