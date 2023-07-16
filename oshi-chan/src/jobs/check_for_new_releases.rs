@@ -6,6 +6,7 @@ use serenity::async_trait;
 use serenity::builder::CreateMessage;
 use serenity::http::Http;
 use std::sync::Arc;
+use tokio::sync::Semaphore;
 use tokio_cron_scheduler::Job;
 
 pub struct CheckForNewReleasesJob {}
@@ -68,9 +69,15 @@ impl OshiJob for CheckForNewReleasesJob {
         println!("Checking for new releases for {} shows", watchlist.len());
 
         let mut tasks = Vec::with_capacity(watchlist.len());
+        let sem = Arc::new(Semaphore::new(2));
+
         for anime in watchlist {
+            let permit = Arc::clone(&sem).acquire_owned().await;
             let pool_copy = pool.clone();
-            tasks.push(tokio::spawn(poll_and_save(pool_copy, anime)));
+            tasks.push(tokio::spawn(async move {
+                let _permit = permit;
+                poll_and_save(pool_copy, anime).await
+            }));
         }
 
         let mut new_releases = Vec::with_capacity(tasks.len());
