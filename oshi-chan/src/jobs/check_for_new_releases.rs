@@ -65,13 +65,16 @@ async fn poll_and_save(
 impl OshiJob for CheckForNewReleasesJob {
     async fn exec(http: &Arc<Http>, pool: &Pool<ConnectionManager<PgConnection>>) -> () {
         let watchlist: Vec<models::WatchList> = get_watchlist(pool);
+        let parallel_limit = Environment::get_release_polling_parallelism_limit();
 
-        println!("Checking for new releases for {} shows", watchlist.len());
+        println!(
+            "Checking for new releases for {} shows (parallelism limit: {})",
+            watchlist.len(),
+            parallel_limit
+        );
 
         let mut tasks = Vec::with_capacity(watchlist.len());
-        let sem = Arc::new(Semaphore::new(
-            Environment::get_release_polling_parallelism_limit(),
-        ));
+        let sem = Arc::new(Semaphore::new(parallel_limit));
 
         for anime in watchlist {
             let permit = Arc::clone(&sem).acquire_owned().await;
