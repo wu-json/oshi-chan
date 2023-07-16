@@ -25,6 +25,7 @@ DISCORD_BOT_TOKEN=some-discord-bot-token
 OSHI_ENV=development
 OSHI_DEVELOPMENT_CHANNEL_ID=some-discord-channel-id
 OSHI_GENERAL_CHANNEL_ID=some-discord-channel-id
+RELEASE_POLLING_PARALLELISM_LIMIT=some-usize
 ```
 
 Note that `OSHI_DEVELOPMENT_CHANNEL_ID` can be used to specify a dedicated development discord channel that a production deployment of Oshi-Chan will ignore.
