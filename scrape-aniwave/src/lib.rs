@@ -1,6 +1,7 @@
 mod browser_utils;
 use browser_utils::{BrowserUtils, TabUtils};
 use scraper::{Html, Selector};
+use std::fs;
 use thiserror::Error;
 use tokio::time::{sleep, Duration};
 
@@ -13,15 +14,15 @@ pub enum IsEpisodeOutError {
 }
 
 /// Checks whether an episode is out by navigating to the url of the episode.
-/// 9anime will redirect the client to episode 1 url if the episode is not out,
+/// aniwave will redirect the client to episode 1 url if the episode is not out,
 /// otherwise it will render the episode page.
 pub async fn is_episode_out(id: &str, episode: u32) -> Result<bool, IsEpisodeOutError> {
-    let url = format!("https://9anime.to/watch/{id}/ep-{episode}");
+    let url = format!("https://aniwave.to/watch/{id}/ep-{episode}");
     let (_browser, tab) = BrowserUtils::create_browser_tab()
         .map_err(|e| IsEpisodeOutError::CreateBrowserTabError(e))?;
 
     // element we use to determine whether page has loaded or not
-    let load_selector = format!("#watch-main[data-url|=\"https://9anime.to/watch/{id}\"]");
+    let load_selector = format!("#watch-main[data-url|=\"https://aniwave.to/watch/{id}\"]");
 
     // first navigation to check whether episode is out or not
     tab.navigate_to(&url)
@@ -68,6 +69,44 @@ pub async fn is_episode_out(id: &str, episode: u32) -> Result<bool, IsEpisodeOut
     Ok(is_out)
 }
 
+#[derive(Error, Debug)]
+pub enum GetPageContentError {
+    #[error("Create browser tab error.")]
+    CreateBrowserTabError(browser_utils::CreateBrowserTabError),
+    #[error("Tab navigate error.")]
+    TabNavigateError(String),
+    #[error("Tab content error.")]
+    TabContentError(String),
+    #[error("File write error.")]
+    FileWriteError(String),
+}
+
+// Scrapes aniwave page content and saves it to a file. This is only meant to be used
+// locally for development purposes and will break if used in a production environment.
+pub async fn get_page_content(id: &str, episode: u32) -> Result<String, GetPageContentError> {
+    let url = format!("https://aniwave.to/watch/{id}/ep-{episode}");
+    let (_browser, tab) = BrowserUtils::create_browser_tab()
+        .map_err(|e| GetPageContentError::CreateBrowserTabError(e))?;
+
+    // first navigation to check whether episode is out or not
+    tab.navigate_to(&url)
+        .map_err(|e| GetPageContentError::TabNavigateError(e.to_string()))?
+        .wait_until_navigated()
+        .map_err(|e| GetPageContentError::TabNavigateError(e.to_string()))?;
+
+    // buffer to ensure content has rendered
+    sleep(Duration::from_millis(500)).await;
+
+    let content = tab
+        .get_content()
+        .map_err(|e| GetPageContentError::TabContentError(e.to_string()))?;
+
+    let path = format!("scrape-aniwave/examples/{id}-ep-{episode}.html");
+    fs::write(&path, content).map_err(|e| GetPageContentError::FileWriteError(e.to_string()))?;
+
+    Ok(path)
+}
+
 #[derive(Debug)]
 pub struct Anime {
     pub id: String,
@@ -93,12 +132,12 @@ pub enum ScrapeAnimeError {
 }
 
 pub async fn scrape_anime(id: &str) -> Result<Anime, ScrapeAnimeError> {
-    let url = format!("https://9anime.to/watch/{id}");
+    let url = format!("https://aniwave.to/watch/{id}");
     let (_browser, tab) = BrowserUtils::create_browser_tab()
         .map_err(|e| ScrapeAnimeError::CreateBrowserTabError(e))?;
 
     // element we use to determine whether page has loaded or not
-    let load_selector = format!("#watch-main[data-url|=\"https://9anime.to/watch/{id}\"]");
+    let load_selector = format!("#watch-main[data-url|=\"https://aniwave.to/watch/{id}\"]");
 
     tab.navigate_to(&url)
         .map_err(|e| ScrapeAnimeError::TabNavigateError(e.to_string()))?

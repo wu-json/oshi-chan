@@ -16,9 +16,9 @@
 
 
 # Added by cargo
-
 .github
 target
 .env.*
 **/*.env
 **/fly.toml
+scrape-aniwave/examples

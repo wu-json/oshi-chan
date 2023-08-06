@@ -1,2 +1,2 @@
 [workspace]
-members = ["oshi-chan", "scrape-9anime", "pg-client"]
+members = ["oshi-chan", "scrape-aniwave", "pg-client"]

@@ -1,8 +1,8 @@
 ## Oshi-chan
 
-Oshi-chan is a Discord Bot that allows you to subscribe to anime releases (via 9anime.to) and get notified when they come out. I built this since my friends and I coordinate anime watch parties in Discord, and I thought it would be useful to have live notifications of new episodes coming out without having to constantly check online manually.
+Oshi-chan is a Discord Bot that allows you to subscribe to anime releases (via aniwave.to) and get notified when they come out. I built this since my friends and I coordinate anime watch parties in Discord, and I thought it would be useful to have live notifications of new episodes coming out without having to constantly check online manually.
 
-Oshi is built entirely with Rust and lives on a single app (excluding the Postgres instance) deployed to [Fly.io](https://fly.io/dashboard). It scrapes 9anime for the shows in the watchlist every hour, and sends a message to the Discord channel when a new release is found.
+Oshi is built entirely with Rust and lives on a single app (excluding the Postgres instance) deployed to [Fly.io](https://fly.io/dashboard). It scrapes aniwave for the shows in the watchlist every hour, and sends a message to the Discord channel when a new release is found.
 
 ![oshi-no-ko-twin](https://github.com/wu-json/oshi-chan/assets/45532884/fdf143e0-47bc-454e-b882-b661b0a7e180)
 

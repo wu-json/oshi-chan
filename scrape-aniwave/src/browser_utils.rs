@@ -29,6 +29,7 @@ impl TabUtils for BrowserUtils {
             Browser::default().map_err(|e| CreateBrowserTabError::CreateError(e.to_string()))?;
 
         let tab = browser
+            .new_context().unwrap()
             .new_tab()
             .map_err(|e| CreateBrowserTabError::NewTabError(e.to_string()))?;
 

@@ -1,7 +1,7 @@
 use crate::environment::{Environment, EnvironmentTrait};
 use crate::jobs::oshi_job::OshiJob;
 use pg_client::{models, ConnectionManager, PgConnection, Pool};
-use scrape_9anime::is_episode_out;
+use scrape_aniwave::is_episode_out;
 use serenity::async_trait;
 use serenity::builder::CreateMessage;
 use serenity::http::Http;
@@ -107,7 +107,7 @@ impl OshiJob for CheckForNewReleasesJob {
                         anime.latest_episode + 1
                     ))
                     .description(format!(
-                        "Check it out at https://9anime.to/watch/{}/ep-{}",
+                        "Check it out at https://aniwave.to/watch/{}/ep-{}",
                         anime.nine_anime_id,
                         anime.latest_episode + 1
                     ))
