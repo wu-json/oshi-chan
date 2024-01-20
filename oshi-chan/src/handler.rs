@@ -60,6 +60,9 @@ impl EventHandler for Handler {
                         }
                         commands::watchlist_delete::exec(&ctx, &msg, command_parts[3]).await;
                     }
+                    "destroy" => {
+                        commands::watchlist_destroy::exec(&ctx, &msg).await;
+                    }
                     "list" => {
                         commands::watchlist_list::exec(&ctx, &msg).await;
                     }

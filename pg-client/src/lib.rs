@@ -57,3 +57,7 @@ pub fn delete_watchlist_entry(connection: &mut PgConnection, anime_id: &str) {
         .execute(connection)
         .unwrap();
 }
+
+pub fn destroy_watchlist(connection: &mut PgConnection) {
+    diesel::delete(watchlist).execute(connection).unwrap();
+}
