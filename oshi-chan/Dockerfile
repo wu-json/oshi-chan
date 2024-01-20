@@ -1,4 +1,4 @@
-FROM rust:latest as builder
+FROM rust:1.75.0-bullseye as builder
 WORKDIR /usr/src/app
 COPY . .
 RUN cargo build --release -p oshi-chan
