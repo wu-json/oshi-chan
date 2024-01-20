@@ -203,7 +203,7 @@ pub async fn scrape_anime(id: &str) -> Result<Anime, ScrapeAnimeError> {
     let total_episodes = Selector::parse("div.info div.bmeta div.meta div")
         .map_err(|e| ScrapeAnimeError::SelectorCreationError(e.to_string()))?;
     let total_episodes = document.select(&&total_episodes).collect::<Vec<_>>();
-    let mut total_episodes_count: u32 = 12;
+    let mut total_episodes_count: u32 = 100;
 
     for ep in total_episodes {
         let text = ep.text().collect::<Vec<_>>();
