@@ -6,6 +6,7 @@ const COMMAND_LIST: &str = "
 !oshi watchlist list: list anime in the watchlist
 !oshi watchlist add <aniwave-id> <latest-episode>: add an anime to the watchlist
 !oshi watchlist delete <aniwave-id>: remove an anime from the watchlist
+!oshi watchlist destroy: clear the watchlist
 !oshi poll: force oshi to poll aniwave for new releases
 ";
 
